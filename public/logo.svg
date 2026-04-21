@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- Left wing (top-left) -->
+  <path d="M28 22c-8-4-18-2-22 4s2 14 10 16c6 2 12-1 16-6l-4-14z" fill="#E0E0E0" stroke="#424242" stroke-width="1.5"/>
+  <path d="M24 24c-6-3-13-1-16 3s1 10 7 12c4 1 9-1 12-5l-3-10z" fill="#F5F5F5"/>
+
+  <!-- Right wing (bottom-right) -->
+  <path d="M92 82c8 4 18 2 22-4s-2-14-10-16c-6-2-12 1-16 6l4 14z" fill="#E0E0E0" stroke="#424242" stroke-width="1.5"/>
+  <path d="M96 80c6 3 13 1 16-3s-1-10-7-12c-4-1-9 1-12 5l3 10z" fill="#F5F5F5"/>
+
+  <!-- Outer coin ring -->
+  <circle cx="60" cy="52" r="36" fill="#F9A825" stroke="#424242" stroke-width="2.5"/>
+
+  <!-- Orange ring segments -->
+  <circle cx="60" cy="52" r="36" fill="none" stroke="#FB8C00" stroke-width="8" stroke-dasharray="14 8" stroke-dashoffset="4"/>
+
+  <!-- Inner coin ring border -->
+  <circle cx="60" cy="52" r="27" fill="none" stroke="#424242" stroke-width="2"/>
+
+  <!-- Inner coin face -->
+  <circle cx="60" cy="52" r="26" fill="#F0E68C"/>
+
+  <!-- Coin face details (eyes and smile) -->
+  <ellipse cx="52" cy="48" rx="2" ry="2.5" fill="#424242"/>
+  <ellipse cx="68" cy="48" rx="2" ry="2.5" fill="#424242"/>
+  <path d="M54 58c3 3 9 3 12 0" stroke="#424242" stroke-width="2" stroke-linecap="round" fill="none"/>
+
+  <!-- Shine highlight -->
+  <ellipse cx="50" cy="40" rx="6" ry="3" fill="white" opacity="0.3" transform="rotate(-20 50 40)"/>
+</svg>

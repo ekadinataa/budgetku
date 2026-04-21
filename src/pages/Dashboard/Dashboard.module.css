@@ -1,0 +1,377 @@
+/* ── Dashboard Layout ──────────────────────────────────────────────── */
+.wrapper {
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+}
+
+.leftCol,
+.rightCol {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Card ─────────────────────────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border-2);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.cardTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0;
+}
+
+/* ── StatCard ─────────────────────────────────────────────────────── */
+.statAccentCircle {
+  position: absolute;
+  right: -10px;
+  top: -10px;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+}
+
+.statLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-5);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.statValue {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-1);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 4px;
+}
+
+.statSub {
+  font-size: 12px;
+  color: var(--text-4);
+}
+
+.statDetail {
+  font-size: 11.5px;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* ── Budget Summary ───────────────────────────────────────────────── */
+.budgetRow {
+  margin-bottom: 16px;
+}
+
+.budgetRowHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.budgetRowLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.budgetSectionDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.budgetSectionName {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+
+.budgetOverflow {
+  font-size: 11px;
+  color: #EF4444;
+  font-weight: 700;
+}
+
+.budgetRowRight {
+  font-size: 13px;
+  color: var(--text-4);
+}
+
+.budgetSpent {
+  font-weight: 600;
+}
+
+.budgetSep {
+  color: var(--text-6);
+}
+
+.budgetFooter {
+  font-size: 11px;
+  color: var(--text-5);
+  margin-top: 4px;
+}
+
+.btnGhost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--bg-2);
+  color: var(--text-3);
+  transition: all 0.15s;
+}
+
+/* ── Calendar ─────────────────────────────────────────────────────── */
+.calNavGroup {
+  display: flex;
+  gap: 4px;
+}
+
+.calNavBtn {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.calDayHeader {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-5);
+  padding: 4px 0;
+}
+
+.calCell {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 5px 2px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: background 0.1s;
+  min-height: 38px;
+  color: var(--text-1);
+  font-family: inherit;
+}
+
+.calCellToday {
+  background: var(--bg-3);
+  border-color: var(--border);
+}
+
+.calCellSel {
+  background: #4F6EF7;
+  border-color: #4F6EF7;
+  color: white;
+}
+
+.calDots {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 2px;
+}
+
+.calDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  margin: 0 auto;
+}
+
+.calDetail {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-2);
+}
+
+.calDetailDate {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-4);
+  margin-bottom: 8px;
+}
+
+.calTxRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.calTxLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calTxDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.calTxNote {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+/* ── Add Transaction Button ───────────────────────────────────────── */
+.addTxBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  background: #4F6EF7;
+  color: white;
+  transition: all 0.15s;
+}
+
+/* ── Wallet Summary ───────────────────────────────────────────────── */
+.walletRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.walletIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.walletInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.walletName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+
+.walletType {
+  font-size: 11px;
+  color: var(--text-5);
+}
+
+.walletBalance {
+  font-size: 13.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.linkBtn {
+  font-size: 12px;
+  color: #4F6EF7;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: inherit;
+}
+
+/* ── Recent Transactions ──────────────────────────────────────────── */
+.recentRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.recentIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+.recentInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.recentNote {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recentMeta {
+  font-size: 11px;
+  color: var(--text-5);
+}

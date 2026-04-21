@@ -1,0 +1,47 @@
+import { fmtFull } from '../../utils/formatters';
+
+/**
+ * AmountText — Color-coded amount display with type prefix.
+ *
+ * Shows a formatted IDR amount with a prefix and color based on transaction type:
+ * - income → green with "+" prefix
+ * - expense → red with "-" prefix
+ * - transfer → indigo with "↔" prefix
+ *
+ * @param {Object} props
+ * @param {'income'|'expense'|'transfer'} props.type - Transaction type
+ * @param {number} props.amount - Amount to display
+ * @param {number} [props.size=14] - Font size in pixels
+ *
+ * Requirements: 4.9
+ */
+export default function AmountText({ type, amount, size = 14 }) {
+  const colorMap = {
+    income: 'var(--amount-income, #16A34A)',
+    expense: 'var(--amount-expense, #DC2626)',
+    transfer: 'var(--amount-transfer, #4F46E5)',
+  };
+
+  const prefixMap = {
+    income: '+',
+    expense: '-',
+    transfer: '↔',
+  };
+
+  const color = colorMap[type] || colorMap.expense;
+  const prefix = prefixMap[type] || '-';
+
+  return (
+    <span
+      style={{
+        color,
+        fontWeight: 600,
+        fontSize: size,
+        fontVariantNumeric: 'tabular-nums',
+      }}
+    >
+      {prefix}
+      {fmtFull(amount)}
+    </span>
+  );
+}

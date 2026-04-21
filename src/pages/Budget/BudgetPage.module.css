@@ -1,0 +1,680 @@
+/* ── Budget Page Layout ──────────────────────────────────────────────── */
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.pageTitle {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-1);
+  margin: 0;
+}
+
+.pageSubtitle {
+  font-size: 13px;
+  color: var(--text-5);
+  margin: 4px 0 0;
+}
+
+.btnGhost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--bg-2);
+  color: var(--text-3);
+  transition: all 0.15s;
+}
+
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  background: #4F6EF7;
+  color: white;
+  transition: all 0.15s;
+}
+
+/* ── Overview Stats Grid ────────────────────────────────────────────── */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+/* ── Stat Card ──────────────────────────────────────────────────────── */
+.statCard {
+  background: var(--bg-card);
+  border-radius: 14px;
+  padding: 16px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border-2);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.statLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-5);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.statValue {
+  font-size: 20px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 2px;
+}
+
+.statSub {
+  font-size: 11.5px;
+  color: var(--text-4);
+}
+
+/* ── Distribution Card ──────────────────────────────────────────────── */
+.distCard {
+  background: var(--bg-card);
+  border-radius: 14px;
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border-2);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.distHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.distTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-1);
+}
+
+.distGuide {
+  font-size: 11px;
+  color: var(--text-5);
+}
+
+.distBar {
+  display: flex;
+  height: 12px;
+  border-radius: 99px;
+  overflow: hidden;
+  gap: 2px;
+}
+
+.distSegment {
+  border-radius: 99px;
+  flex-shrink: 0;
+  transition: width 0.4s;
+}
+
+.distUnalloc {
+  flex: 1;
+  background: var(--border);
+  border-radius: 99px;
+  min-width: 4px;
+}
+
+.distLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.distLegendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.distDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.distLegendLabel {
+  font-size: 12px;
+  color: var(--text-4);
+}
+
+.distLegendPct {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.distLegendGuide {
+  font-size: 11px;
+  color: var(--text-6);
+}
+
+/* ── Section Card ───────────────────────────────────────────────────── */
+.sectionCard {
+  background: var(--bg-card);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border-2);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.sectionHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sectionDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.sectionName {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-1);
+}
+
+.sectionOverflowBadge {
+  font-size: 11px;
+  background: #FEE2E2;
+  color: #991B1B;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.sectionHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sectionAmounts {
+  text-align: right;
+}
+
+.sectionSpent {
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.sectionSep {
+  color: var(--text-6);
+  font-weight: 400;
+}
+
+.sectionRemaining {
+  font-size: 11px;
+  color: var(--text-5);
+}
+
+.sectionEditBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--bg-2);
+  color: var(--text-3);
+  transition: all 0.15s;
+}
+
+/* ── Category Cards Grid ────────────────────────────────────────────── */
+.catGrid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.catCard {
+  background: var(--bg-2);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.catCardHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.catCardLeft {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.catDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.catName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.catOver {
+  font-size: 10px;
+  color: #EF4444;
+  font-weight: 700;
+}
+
+.catFooter {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+}
+
+.catAmounts {
+  font-size: 11px;
+  color: var(--text-5);
+}
+
+.catPct {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ── Unallocated in Section ─────────────────────────────────────────── */
+.unallocCard {
+  background: #FFFBEB;
+  border-radius: 10px;
+  padding: 12px 14px;
+  border: 1.5px dashed #FCD34D;
+}
+
+.unallocLabel {
+  font-size: 12px;
+  color: #92400E;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.unallocValue {
+  font-size: 16px;
+  font-weight: 800;
+  color: #B45309;
+}
+
+/* ── Section Edit Modal ─────────────────────────────────────────────── */
+.allocBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.allocBarOver {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+.allocBarUnder {
+  background: #FFFBEB;
+  color: #854D0E;
+}
+
+.allocBarMatch {
+  background: #F0FDF4;
+  color: #166534;
+}
+
+.allocBarLabel strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.allocBarStatus {
+  font-weight: 700;
+}
+
+.catList {
+  margin-bottom: 12px;
+}
+
+.catRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.catRowDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.catRowName {
+  font-size: 13px;
+  flex: 1;
+  color: var(--text-2);
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--text-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.iconBtn:hover {
+  background: var(--bg-3);
+}
+
+.iconBtnDanger {
+  color: #EF4444;
+}
+
+/* ── Inline Edit Form ───────────────────────────────────────────────── */
+.inlineEdit {
+  background: var(--bg-2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.inlineEditRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.colorPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.colorSwatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  border: 2.5px solid transparent;
+  transition: border-color 0.15s;
+}
+
+.colorSwatchSelected {
+  border-color: var(--text-1);
+}
+
+.inlineEditActions {
+  display: flex;
+  gap: 8px;
+}
+
+.btnSmallPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  background: #4F6EF7;
+  color: white;
+  transition: all 0.15s;
+}
+
+.btnSmallGhost {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--bg-2);
+  color: var(--text-3);
+  transition: all 0.15s;
+}
+
+/* ── Add Category Row ───────────────────────────────────────────────── */
+.addCatRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.allCatsMsg {
+  font-size: 12px;
+  color: var(--text-6);
+  margin-bottom: 10px;
+  padding: 4px 0;
+}
+
+/* ── Custom Category Form ───────────────────────────────────────────── */
+.customCatForm {
+  background: var(--bg-2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border: 1.5px solid var(--border);
+}
+
+.customCatTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-4);
+  margin-bottom: 8px;
+}
+
+.createCatBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--bg-2);
+  color: var(--text-3);
+  margin-bottom: 16px;
+  transition: all 0.15s;
+}
+
+/* ── Header Actions ─────────────────────────────────────────────────── */
+.headerActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ── Period Info Bar ────────────────────────────────────────────────── */
+.periodBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border-2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.periodBarLabel {
+  font-size: 12px;
+  color: var(--text-5);
+  font-weight: 500;
+}
+
+.periodBarValue {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-1);
+}
+
+.periodBarRange {
+  font-size: 11px;
+  color: var(--text-4);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Period Mode Selector ───────────────────────────────────────────── */
+.periodModeRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.periodModeBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.periodModeBtn:hover {
+  border-color: var(--text-5);
+  opacity: 1;
+}
+
+.periodModeBtnActive {
+  border-color: #4F6EF7;
+  background: rgba(79, 110, 247, 0.06);
+}
+
+.periodModeIcon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.periodModeName {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-1);
+  margin-bottom: 2px;
+}
+
+.periodModeDesc {
+  font-size: 11px;
+  color: var(--text-5);
+}
+
+/* ── Day Picker Grid ────────────────────────────────────────────────── */
+.dayGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dayBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 9px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-3);
+  font-weight: 400;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.dayBtn:hover {
+  border-color: var(--text-5);
+  opacity: 1;
+}
+
+.dayBtnActive {
+  border-color: #4F6EF7;
+  background: var(--bg-3);
+  color: #4F6EF7;
+  font-weight: 700;
+}
+
+/* ── Cycle Example ──────────────────────────────────────────────────── */
+.cycleExample {
+  font-size: 12px;
+  color: var(--text-3);
+  background: var(--bg-3);
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-top: 8px;
+}
+
+.cycleExampleLabel {
+  font-weight: 600;
+  color: var(--text-4);
+}

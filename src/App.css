@@ -1,0 +1,99 @@
+/* ── Light Theme (default) ─────────────────────────────────────────── */
+:root {
+  --bg: #F1F5F9;
+  --bg-card: #FFFFFF;
+  --bg-2: #F8FAFC;
+  --bg-3: #F1F5F9;
+  --border: #E2E8F0;
+  --border-2: #F1F5F9;
+  --text-1: #0F172A;
+  --text-2: #334155;
+  --text-3: #475569;
+  --text-4: #64748B;
+  --text-5: #94A3B8;
+  --text-6: #CBD5E1;
+  --sidebar-bg: #111827;
+}
+
+/* ── Dark Theme ───────────────────────────────────────────────────── */
+:root[data-theme="dark"] {
+  --bg: #0D1117;
+  --bg-card: #161B22;
+  --bg-2: #0D1117;
+  --bg-3: #1C2128;
+  --border: #30363D;
+  --border-2: #21262D;
+  --text-1: #E6EDF3;
+  --text-2: #CDD9E5;
+  --text-3: #ADBAC7;
+  --text-4: #768390;
+  --text-5: #545D68;
+  --text-6: #373E47;
+  --sidebar-bg: #010409;
+}
+
+/* ── Global Reset ─────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text-1);
+  transition: background 0.2s, color 0.2s;
+}
+
+#root {
+  height: 100%;
+  display: flex;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 99px;
+}
+
+/* ── Input & Select Transitions ───────────────────────────────────── */
+input,
+select,
+textarea {
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+input:focus,
+select:focus {
+  border-color: #4F6EF7 !important;
+  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.12);
+}
+
+/* ── Select Appearance Override ────────────────────────────────────── */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px !important;
+  cursor: pointer;
+}
+
+/* ── Button Hover ─────────────────────────────────────────────────── */
+button:hover {
+  opacity: 0.88;
+}

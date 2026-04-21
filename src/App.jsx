@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { useAuth } from './context/AuthContext';
+import { auth as firebaseAuth } from './config/firebase';
 import Sidebar from './components/Sidebar/Sidebar';
 import DataMigrator from './components/DataMigrator';
 import Dashboard from './pages/Dashboard/Dashboard';
@@ -13,8 +14,12 @@ import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
 import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
 import { STORAGE_KEY } from './utils/constants';
+import { WALLETS_INIT, TRANSACTIONS_INIT, BUDGETS_INIT, CATEGORIES } from './data/defaults';
 import * as api from './services/api';
 import './App.css';
+
+// Detect if Firebase is configured — if not, run in local-only mode
+const IS_LOCAL_MODE = !firebaseAuth;
 
 function App() {
   const { user, loading: authLoading, login, register, logout, resetPassword } = useAuth();
@@ -22,14 +27,24 @@ function App() {
   // Auth page navigation (login, register, forgot)
   const [authPage, setAuthPage] = useState('login');
 
+  // Load persisted state from localStorage for local-only mode
+  const loadLocalState = () => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch { /* ignore */ }
+    return null;
+  };
+  const savedLocal = IS_LOCAL_MODE ? loadLocalState() : null;
+
   // App data state
-  const [page, setPage] = useState('dashboard');
-  const [wallets, setWallets] = useState([]);
-  const [transactions, setTransactions] = useState([]);
-  const [budgets, setBudgets] = useState({});
-  const [categories, setCategories] = useState([]);
-  const [darkMode, setDarkMode] = useState(false);
-  const [cycleStart, setCycleStart] = useState(1);
+  const [page, setPage] = useState(savedLocal?.page || 'dashboard');
+  const [wallets, setWallets] = useState(savedLocal?.wallets || (IS_LOCAL_MODE ? WALLETS_INIT : []));
+  const [transactions, setTransactions] = useState(savedLocal?.transactions || (IS_LOCAL_MODE ? TRANSACTIONS_INIT : []));
+  const [budgets, setBudgets] = useState(savedLocal?.budgets || (IS_LOCAL_MODE ? BUDGETS_INIT : {}));
+  const [categories, setCategories] = useState(savedLocal?.categories || (IS_LOCAL_MODE ? CATEGORIES : []));
+  const [darkMode, setDarkMode] = useState(savedLocal?.darkMode || false);
+  const [cycleStart, setCycleStart] = useState(savedLocal?.cycleStart || 1);
 
   // Loading & error states
   const [dataLoading, setDataLoading] = useState(false);
@@ -42,6 +57,14 @@ function App() {
 
   // Global "Add Transaction" modal state
   const [showAddTx, setShowAddTx] = useState(false);
+
+  // In local-only mode, persist all state to localStorage
+  useEffect(() => {
+    if (!IS_LOCAL_MODE) return;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      page, wallets, transactions, budgets, categories, darkMode, cycleStart,
+    }));
+  }, [page, wallets, transactions, budgets, categories, darkMode, cycleStart]);
 
   // Show toast notification
   const showToast = useCallback((msg) => {
@@ -136,7 +159,7 @@ function App() {
   }, [darkMode, page, savePreferences]);
 
   // ── Auth pages (not authenticated) ─────────────────────────────────
-  if (authLoading) {
+  if (!IS_LOCAL_MODE && authLoading) {
     return (
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -155,7 +178,7 @@ function App() {
     );
   }
 
-  if (!user) {
+  if (!IS_LOCAL_MODE && !user) {
     switch (authPage) {
       case 'register':
         return <RegisterPage onRegister={register} onNavigate={setAuthPage} />;
@@ -167,7 +190,7 @@ function App() {
   }
 
   // ── Migration prompt ───────────────────────────────────────────────
-  if (showMigrator && !migrationChecked) {
+  if (!IS_LOCAL_MODE && showMigrator && !migrationChecked) {
     return (
       <ThemeProvider darkMode={darkMode} setDarkMode={handleSetDarkMode}>
         <div style={{
@@ -187,7 +210,7 @@ function App() {
   }
 
   // ── Data loading state ─────────────────────────────────────────────
-  if (dataLoading) {
+  if (!IS_LOCAL_MODE && dataLoading) {
     return (
       <ThemeProvider darkMode={darkMode} setDarkMode={handleSetDarkMode}>
         <div style={{
@@ -208,7 +231,7 @@ function App() {
     );
   }
 
-  if (dataError && wallets.length === 0) {
+  if (!IS_LOCAL_MODE && dataError && wallets.length === 0) {
     return (
       <ThemeProvider darkMode={darkMode} setDarkMode={handleSetDarkMode}>
         <div style={{
@@ -233,8 +256,13 @@ function App() {
 
   // ── Helpers for API-backed state updates ───────────────────────────
 
-  /** Create a wallet via API and update local state */
+  /** Create a wallet via API (or locally) and update local state */
   const handleCreateWallet = async (data) => {
+    if (IS_LOCAL_MODE) {
+      const created = { id: 'w' + Date.now(), ...data, balance: parseFloat(data.balance) || 0 };
+      setWallets((ws) => [...ws, created]);
+      return created;
+    }
     try {
       const created = await api.createWallet(data);
       setWallets((ws) => [...ws, created]);
@@ -245,8 +273,13 @@ function App() {
     }
   };
 
-  /** Update a wallet via API and update local state */
+  /** Update a wallet via API (or locally) and update local state */
   const handleUpdateWallet = async (id, data) => {
+    if (IS_LOCAL_MODE) {
+      const updated = { ...data, id, balance: parseFloat(data.balance) || 0 };
+      setWallets((ws) => ws.map((w) => (w.id === id ? { ...w, ...updated } : w)));
+      return updated;
+    }
     try {
       const updated = await api.updateWallet(id, data);
       setWallets((ws) => ws.map((w) => (w.id === id ? updated : w)));
@@ -257,8 +290,12 @@ function App() {
     }
   };
 
-  /** Delete a wallet via API and update local state */
+  /** Delete a wallet via API (or locally) and update local state */
   const handleDeleteWallet = async (id) => {
+    if (IS_LOCAL_MODE) {
+      setWallets((ws) => ws.filter((w) => w.id !== id));
+      return;
+    }
     try {
       await api.deleteWallet(id);
       setWallets((ws) => ws.filter((w) => w.id !== id));
@@ -268,8 +305,13 @@ function App() {
     }
   };
 
-  /** Create a transaction via API and update local state (including wallet balances) */
+  /** Create a transaction via API (or locally) and update local state (including wallet balances) */
   const handleCreateTransaction = async (data) => {
+    if (IS_LOCAL_MODE) {
+      const created = { id: 'tx' + Date.now(), ...data, amount: parseFloat(data.amount) || 0 };
+      setTransactions((ts) => [created, ...ts]);
+      return created;
+    }
     try {
       const created = await api.createTransaction(data);
       setTransactions((ts) => [created, ...ts]);
@@ -283,8 +325,12 @@ function App() {
     }
   };
 
-  /** Update a transaction via API and update local state */
+  /** Update a transaction via API (or locally) and update local state */
   const handleUpdateTransaction = async (id, data) => {
+    if (IS_LOCAL_MODE) {
+      setTransactions((ts) => ts.map((t) => (t.id === id ? { ...t, ...data } : t)));
+      return { id, ...data };
+    }
     try {
       const updated = await api.updateTransaction(id, data);
       setTransactions((ts) => ts.map((t) => (t.id === id ? updated : t)));
@@ -298,8 +344,12 @@ function App() {
     }
   };
 
-  /** Delete a transaction via API and update local state */
+  /** Delete a transaction via API (or locally) and update local state */
   const handleDeleteTransaction = async (id) => {
+    if (IS_LOCAL_MODE) {
+      setTransactions((ts) => ts.filter((t) => t.id !== id));
+      return;
+    }
     try {
       await api.deleteTransaction(id);
       setTransactions((ts) => ts.filter((t) => t.id !== id));
@@ -312,10 +362,11 @@ function App() {
     }
   };
 
-  /** Update budgets via API and update local state */
+  /** Update budgets via API (or locally) and update local state */
   const handleSetBudgets = async (valOrFn) => {
     const newBudgets = typeof valOrFn === 'function' ? valOrFn(budgets) : valOrFn;
     setBudgets(newBudgets);
+    if (IS_LOCAL_MODE) return;
     // Find which month keys changed and update them
     for (const [monthKey, data] of Object.entries(newBudgets)) {
       if (JSON.stringify(budgets[monthKey]) !== JSON.stringify(data)) {
@@ -328,8 +379,13 @@ function App() {
     }
   };
 
-  /** Create a category via API and update local state */
+  /** Create a category via API (or locally) and update local state */
   const handleCreateCategory = async (data) => {
+    if (IS_LOCAL_MODE) {
+      const created = { id: 'c_' + Date.now(), ...data };
+      setCategories((cs) => [...cs, created]);
+      return created;
+    }
     try {
       const created = await api.createCategory(data);
       setCategories((cs) => [...cs, created]);
@@ -340,8 +396,12 @@ function App() {
     }
   };
 
-  /** Update a category via API and update local state */
+  /** Update a category via API (or locally) and update local state */
   const handleUpdateCategory = async (id, data) => {
+    if (IS_LOCAL_MODE) {
+      setCategories((cs) => cs.map((c) => (c.id === id ? { ...c, ...data } : c)));
+      return { id, ...data };
+    }
     try {
       const updated = await api.updateCategory(id, data);
       setCategories((cs) => cs.map((c) => (c.id === id ? updated : c)));
@@ -352,8 +412,12 @@ function App() {
     }
   };
 
-  /** Delete a category via API and update local state */
+  /** Delete a category via API (or locally) and update local state */
   const handleDeleteCategory = async (id) => {
+    if (IS_LOCAL_MODE) {
+      setCategories((cs) => cs.filter((c) => c.id !== id));
+      return;
+    }
     try {
       await api.deleteCategory(id);
       setCategories((cs) => cs.filter((c) => c.id !== id));

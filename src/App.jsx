@@ -9,13 +9,15 @@ import WalletPage from './pages/Wallet/WalletPage';
 import TransactionsPage from './pages/Transactions/TransactionsPage';
 import BudgetPage from './pages/Budget/BudgetPage';
 import ReportsPage from './pages/Reports/ReportsPage';
+import SettingsPage from './pages/Settings/SettingsPage';
 import TxFormModal from './pages/Transactions/TxFormModal';
 import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
 import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
 import { STORAGE_KEY } from './utils/constants';
 import { WALLETS_INIT, TRANSACTIONS_INIT, BUDGETS_INIT, CATEGORIES } from './data/defaults';
-import * as api from './services/api';
+import * as api from './services/firestoreService';
+import { computeAppend } from './services/importService';
 import './App.css';
 
 // Detect if Firebase is configured — if not, run in local-only mode
@@ -45,6 +47,9 @@ function App() {
   const [categories, setCategories] = useState(savedLocal?.categories || (IS_LOCAL_MODE ? CATEGORIES : []));
   const [darkMode, setDarkMode] = useState(savedLocal?.darkMode || false);
   const [cycleStart, setCycleStart] = useState(savedLocal?.cycleStart || 1);
+  const [salaryAdjust, setSalaryAdjust] = useState(savedLocal?.salaryAdjust || false);
+  const [periodMode, setPeriodMode] = useState(savedLocal?.periodMode || 'month');
+  const [customRanges, setCustomRanges] = useState(savedLocal?.customRanges || []);
 
   // Loading & error states
   const [dataLoading, setDataLoading] = useState(false);
@@ -62,9 +67,9 @@ function App() {
   useEffect(() => {
     if (!IS_LOCAL_MODE) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      page, wallets, transactions, budgets, categories, darkMode, cycleStart,
+      page, wallets, transactions, budgets, categories, darkMode, cycleStart, salaryAdjust, periodMode, customRanges,
     }));
-  }, [page, wallets, transactions, budgets, categories, darkMode, cycleStart]);
+  }, [page, wallets, transactions, budgets, categories, darkMode, cycleStart, salaryAdjust, periodMode, customRanges]);
 
   // Show toast notification
   const showToast = useCallback((msg) => {
@@ -107,7 +112,10 @@ function App() {
       if (prefsData) {
         if (prefsData.darkMode !== undefined) setDarkMode(prefsData.darkMode);
         if (prefsData.cycleStart !== undefined) setCycleStart(prefsData.cycleStart);
+        if (prefsData.salaryAdjust !== undefined) setSalaryAdjust(prefsData.salaryAdjust);
         if (prefsData.page !== undefined) setPage(prefsData.page);
+        if (prefsData.periodMode !== undefined) setPeriodMode(prefsData.periodMode);
+        if (prefsData.customRanges !== undefined) setCustomRanges(prefsData.customRanges);
       }
     } catch (err) {
       setDataError('Gagal memuat data. Periksa koneksi Anda.');
@@ -140,23 +148,37 @@ function App() {
     }
   }, [user]);
 
-  // Wrap setDarkMode to also persist to API
-  const handleSetDarkMode = useCallback((valOrFn) => {
-    setDarkMode((prev) => {
-      const next = typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn;
-      savePreferences({ darkMode: next, cycleStart, page });
-      return next;
-    });
-  }, [cycleStart, page, savePreferences]);
+  // Auto-persist preferences to Firestore whenever any preference value changes
+  const prefsInitialized = !dataLoading && user;
+  useEffect(() => {
+    if (!prefsInitialized || IS_LOCAL_MODE) return;
+    // Debounce to batch rapid state changes (e.g., setPeriodMode + setCustomRanges in same handler)
+    const timer = setTimeout(() => {
+      savePreferences({ darkMode, cycleStart, salaryAdjust, page, periodMode, customRanges });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [darkMode, cycleStart, salaryAdjust, page, periodMode, customRanges, prefsInitialized, savePreferences]);
 
-  // Wrap setCycleStart to also persist to API
+  // Simple setters for preferences (no longer need individual persist wrappers for periodMode/customRanges)
+  const handleSetDarkMode = useCallback((valOrFn) => {
+    setDarkMode((prev) => typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn);
+  }, []);
+
   const handleSetCycleStart = useCallback((valOrFn) => {
-    setCycleStart((prev) => {
-      const next = typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn;
-      savePreferences({ darkMode, cycleStart: next, page });
-      return next;
-    });
-  }, [darkMode, page, savePreferences]);
+    setCycleStart((prev) => typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn);
+  }, []);
+
+  const handleSetSalaryAdjust = useCallback((valOrFn) => {
+    setSalaryAdjust((prev) => typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn);
+  }, []);
+
+  const handleSetPeriodMode = useCallback((valOrFn) => {
+    setPeriodMode((prev) => typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn);
+  }, []);
+
+  const handleSetCustomRanges = useCallback((valOrFn) => {
+    setCustomRanges((prev) => typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn);
+  }, []);
 
   // ── Auth pages (not authenticated) ─────────────────────────────────
   if (!IS_LOCAL_MODE && authLoading) {
@@ -427,6 +449,172 @@ function App() {
     }
   };
 
+  /** Reset all user data, reload defaults, and navigate to dashboard */
+  const handleResetData = async () => {
+    await api.resetUserData();
+    await fetchAllData();
+    setPage('dashboard');
+    showToast('Data berhasil direset.');
+  };
+
+  /**
+   * Apply imported data in the specified mode.
+   * @param {Object} importData - Validated data from import file
+   * @param {'replace' | 'append'} mode
+   * @returns {Promise<{ added?: number, skipped?: number }>}
+   */
+  const handleImportData = async (importData, mode) => {
+    // Handle CSV transaction import (has _csvImport marker)
+    if (importData._csvImport) {
+      const { transactions: csvTransactions, newCategories } = importData;
+      const categoriesCreated = (newCategories || []).length;
+
+      // Compute balance effects for each wallet from the imported transactions
+      const balanceEffects = {}; // walletId → net balance change
+      for (const tx of (csvTransactions || [])) {
+        const amt = tx.amount || 0;
+        if (tx.type === 'income') {
+          balanceEffects[tx.walletId] = (balanceEffects[tx.walletId] || 0) + amt;
+        } else if (tx.type === 'expense') {
+          balanceEffects[tx.walletId] = (balanceEffects[tx.walletId] || 0) - amt;
+        } else if (tx.type === 'transfer') {
+          balanceEffects[tx.walletId] = (balanceEffects[tx.walletId] || 0) - amt;
+          if (tx.toWalletId) {
+            balanceEffects[tx.toWalletId] = (balanceEffects[tx.toWalletId] || 0) + amt;
+          }
+        }
+      }
+
+      if (IS_LOCAL_MODE) {
+        const snapshot = {
+          transactions: [...transactions],
+          categories: [...categories],
+          wallets: [...wallets],
+        };
+        try {
+          // Add new categories first
+          if (newCategories && newCategories.length > 0) {
+            setCategories((cs) => [...cs, ...newCategories]);
+          }
+          // Add transactions
+          if (csvTransactions && csvTransactions.length > 0) {
+            setTransactions((ts) => [...ts, ...csvTransactions]);
+          }
+          // Update wallet balances
+          setWallets((ws) => ws.map((w) => {
+            const effect = balanceEffects[w.id];
+            if (effect) return { ...w, balance: w.balance + effect };
+            return w;
+          }));
+          return { added: csvTransactions.length, skipped: 0, categoriesCreated };
+        } catch (err) {
+          setTransactions(snapshot.transactions);
+          setCategories(snapshot.categories);
+          setWallets(snapshot.wallets);
+          throw err;
+        }
+      } else {
+        try {
+          // Migrate new categories and transactions via API
+          const migratePayload = {
+            wallets: [],
+            transactions: csvTransactions || [],
+            budgets: {},
+            categories: newCategories || [],
+          };
+          await api.migrateData(migratePayload);
+          // Update wallet balances in Firestore
+          for (const w of wallets) {
+            const effect = balanceEffects[w.id];
+            if (effect) {
+              await api.updateWallet(w.id, { ...w, balance: w.balance + effect });
+            }
+          }
+          await fetchAllData();
+          return { added: csvTransactions.length, skipped: 0, categoriesCreated };
+        } catch (err) {
+          await fetchAllData();
+          throw err;
+        }
+      }
+    }
+
+    if (mode === 'replace') {
+      if (IS_LOCAL_MODE) {
+        // Snapshot current state for rollback
+        const snapshot = {
+          wallets: [...wallets],
+          transactions: [...transactions],
+          budgets: { ...budgets },
+          categories: [...categories],
+        };
+        try {
+          setWallets(importData.wallets || []);
+          setTransactions(importData.transactions || []);
+          setBudgets(importData.budgets || {});
+          setCategories(importData.categories || []);
+          return { added: 0, skipped: 0 };
+        } catch (err) {
+          // Rollback
+          setWallets(snapshot.wallets);
+          setTransactions(snapshot.transactions);
+          setBudgets(snapshot.budgets);
+          setCategories(snapshot.categories);
+          throw err;
+        }
+      } else {
+        // Authenticated mode: reset then migrate
+        try {
+          await api.resetUserData();
+          await api.migrateData(importData);
+          await fetchAllData();
+          return { added: 0, skipped: 0 };
+        } catch (err) {
+          // Rollback: re-fetch to restore whatever state remains
+          await fetchAllData();
+          throw err;
+        }
+      }
+    } else {
+      // Append mode
+      const existingData = { wallets, transactions, budgets, categories };
+      const { toAdd, counts } = computeAppend(importData, existingData);
+
+      if (IS_LOCAL_MODE) {
+        const snapshot = {
+          wallets: [...wallets],
+          transactions: [...transactions],
+          budgets: { ...budgets },
+          categories: [...categories],
+        };
+        try {
+          setWallets((ws) => [...ws, ...toAdd.wallets]);
+          setTransactions((ts) => [...ts, ...toAdd.transactions]);
+          setBudgets((bs) => ({ ...bs, ...toAdd.budgets }));
+          setCategories((cs) => [...cs, ...toAdd.categories]);
+          return counts;
+        } catch (err) {
+          // Rollback
+          setWallets(snapshot.wallets);
+          setTransactions(snapshot.transactions);
+          setBudgets(snapshot.budgets);
+          setCategories(snapshot.categories);
+          throw err;
+        }
+      } else {
+        // Authenticated mode: migrate only new items, then refresh
+        try {
+          await api.migrateData(toAdd);
+          await fetchAllData();
+          return counts;
+        } catch (err) {
+          await fetchAllData();
+          throw err;
+        }
+      }
+    }
+  };
+
   // ── Wrapped setters that pass API-backed functions to child components ──
   // These wrap the state setters so child components can call them the same way
   // but the changes go through the API.
@@ -510,6 +698,12 @@ function App() {
             setCategories={apiSetCategories}
             cycleStart={cycleStart}
             setCycleStart={handleSetCycleStart}
+            salaryAdjust={salaryAdjust}
+            setSalaryAdjust={handleSetSalaryAdjust}
+            periodMode={periodMode}
+            setPeriodMode={handleSetPeriodMode}
+            customRanges={customRanges}
+            setCustomRanges={handleSetCustomRanges}
             onCreateCategory={handleCreateCategory}
             onUpdateCategory={handleUpdateCategory}
             onDeleteCategory={handleDeleteCategory}
@@ -523,7 +717,24 @@ function App() {
             wallets={wallets}
             cycleStart={cycleStart}
             setCycleStart={handleSetCycleStart}
+            salaryAdjust={salaryAdjust}
             categories={categories}
+          />
+        );
+      case 'settings':
+        return (
+          <SettingsPage
+            onResetData={handleResetData}
+            wallets={wallets}
+            transactions={transactions}
+            budgets={budgets}
+            categories={categories}
+            preferences={{ darkMode, cycleStart, salaryAdjust, page, periodMode, customRanges }}
+            onImportData={handleImportData}
+            showToast={showToast}
+            onCreateCategory={handleCreateCategory}
+            onUpdateCategory={handleUpdateCategory}
+            onDeleteCategory={handleDeleteCategory}
           />
         );
       default:
@@ -550,20 +761,14 @@ function App() {
         user={user}
         onLogout={logout}
       />
-      <main
-        style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '24px',
-          background: 'var(--bg)',
-        }}
-      >
+      <main className="appMain">
         {renderPage()}
       </main>
 
       {/* Toast notification */}
       {toast && (
         <div
+          className="appToast"
           style={{
             position: 'fixed',
             bottom: 24,

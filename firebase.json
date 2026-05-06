@@ -8,13 +8,6 @@
     ],
     "rewrites": [
       {
-        "source": "/api/**",
-        "function": {
-          "functionId": "api",
-          "region": "asia-southeast2"
-        }
-      },
-      {
         "source": "**",
         "destination": "/index.html"
       }
@@ -30,10 +23,6 @@
         ]
       }
     ]
-  },
-  "functions": {
-    "source": "functions",
-    "runtime": "nodejs18"
   },
   "firestore": {
     "rules": "firestore.rules"

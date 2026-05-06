@@ -3,6 +3,7 @@ import Modal from '../../components/Modal/Modal';
 import Field from '../../components/ui/Field';
 import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
+import CategoryPicker from '../../components/ui/CategoryPicker';
 import { filterCategoriesByTxType } from '../../utils/helpers';
 import { TODAY } from '../../data/defaults';
 import styles from './TransactionsPage.module.css';
@@ -84,11 +85,11 @@ export default function TxFormModal({ wallets, initial, onClose, onSave, categor
           </Field>
         ) : (
           <Field label="Kategori">
-            <Select value={form.categoryId} onChange={set('categoryId')}>
-              {availCats.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </Select>
+            <CategoryPicker
+              categories={availCats}
+              value={form.categoryId}
+              onChange={set('categoryId')}
+            />
           </Field>
         )}
       </div>

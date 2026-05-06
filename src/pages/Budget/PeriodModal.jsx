@@ -1,26 +1,91 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Modal from '../../components/Modal/Modal';
 import Field from '../../components/ui/Field';
+import Input from '../../components/ui/Input';
+import { adjustCycleStart } from '../../utils/periodAdjuster';
+import { validateCustomRange } from '../../services/validator';
 import styles from './BudgetPage.module.css';
 
 const DAY_OPTIONS = [1, 5, 10, 15, 20, 21, 22, 23, 24, 25, 26, 27, 28];
 
 /**
- * PeriodModal — Choose budget period mode: standard month or custom billing cycle.
+ * PeriodModal — Choose budget period mode: standard month, custom billing cycle,
+ * or custom date range.
  *
  * "Per Bulan" = standard calendar month (1st – end of month).
  * "Custom Siklus" = billing cycle starting on a chosen day (e.g. 23rd of prev month – 22nd).
- * Useful for users who receive salary on specific dates like the 23rd–25th.
+ * "Custom Rentang" = user-defined start and end dates for the budget period.
+ *
+ * When in Custom Siklus mode, a "Sesuaikan hari libur" toggle allows the user
+ * to enable automatic adjustment of the cycle start date when payday falls on
+ * a weekend or Indonesian public holiday.
  *
  * @param {Object} props
- * @param {'month'|'cycle'} props.currentMode
+ * @param {'month'|'cycle'|'range'} props.currentMode
  * @param {number} props.currentCycleStart
+ * @param {boolean} [props.currentSalaryAdjust=false]
  * @param {() => void} props.onClose
- * @param {(mode: string, cycleStart: number) => void} props.onSave
+ * @param {(mode: string, cycleStart: number, salaryAdjust: boolean, rangeStart?: string, rangeEnd?: string) => void} props.onSave
  */
-export default function PeriodModal({ currentMode, currentCycleStart, onClose, onSave }) {
+export default function PeriodModal({ currentMode, currentCycleStart, currentSalaryAdjust = false, onClose, onSave }) {
   const [mode, setMode] = useState(currentMode);
   const [day, setDay] = useState(currentCycleStart > 1 ? currentCycleStart : 25);
+  const [salaryAdj, setSalaryAdj] = useState(currentSalaryAdjust);
+  const [rangeStart, setRangeStart] = useState('');
+  const [rangeEnd, setRangeEnd] = useState('');
+  const [rangeError, setRangeError] = useState('');
+
+  // Compute adjusted date preview for the current month
+  const adjustedPreview = useMemo(() => {
+    if (!salaryAdj || mode !== 'cycle' || day <= 1) return null;
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1; // 1-indexed
+    const adjusted = adjustCycleStart(year, month, day);
+    const nominal = new Date(year, month - 1, day);
+    const isAdjusted = adjusted.getTime() !== nominal.getTime();
+    return {
+      date: adjusted,
+      label: adjusted.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
+      isAdjusted,
+    };
+  }, [salaryAdj, mode, day]);
+
+  // Validate range dates whenever they change
+  const handleRangeStartChange = (e) => {
+    const val = e.target.value;
+    setRangeStart(val);
+    if (val && rangeEnd) {
+      const err = validateCustomRange({ start: val, end: rangeEnd });
+      setRangeError(err && rangeEnd <= val ? 'Tanggal akhir harus setelah tanggal mulai' : '');
+    } else {
+      setRangeError('');
+    }
+  };
+
+  const handleRangeEndChange = (e) => {
+    const val = e.target.value;
+    setRangeEnd(val);
+    if (rangeStart && val) {
+      const err = validateCustomRange({ start: rangeStart, end: val });
+      setRangeError(err && val <= rangeStart ? 'Tanggal akhir harus setelah tanggal mulai' : '');
+    } else {
+      setRangeError('');
+    }
+  };
+
+  // Determine if save button should be disabled
+  const isSaveDisabled = mode === 'range' && (
+    !rangeStart || !rangeEnd || validateCustomRange({ start: rangeStart, end: rangeEnd }) !== null
+  );
+
+  const handleSave = () => {
+    if (mode === 'range') {
+      onSave('range', 1, false, rangeStart, rangeEnd);
+    } else {
+      onSave(mode, mode === 'cycle' ? day : 1, mode === 'cycle' ? salaryAdj : false);
+    }
+  };
 
   return (
     <Modal title="Atur Periode Budget" onClose={onClose} width={460}>
@@ -53,10 +118,20 @@ export default function PeriodModal({ currentMode, currentCycleStart, onClose, o
               <div className={styles.periodModeDesc}>Sesuai tanggal gajian</div>
             </div>
           </button>
+          <button
+            className={`${styles.periodModeBtn} ${mode === 'range' ? styles.periodModeBtnActive : ''}`}
+            onClick={() => setMode('range')}
+          >
+            <span className={styles.periodModeIcon}>📆</span>
+            <div>
+              <div className={styles.periodModeName}>Custom Rentang</div>
+              <div className={styles.periodModeDesc}>Pilih tanggal mulai & akhir</div>
+            </div>
+          </button>
         </div>
       </Field>
 
-      {/* Cycle start day picker (only shown for custom mode) */}
+      {/* Cycle start day picker (only shown for custom cycle mode) */}
       {mode === 'cycle' && (
         <Field label="Tanggal Mulai Siklus">
           <div className={styles.dayGrid}>
@@ -84,9 +159,57 @@ export default function PeriodModal({ currentMode, currentCycleStart, onClose, o
         </Field>
       )}
 
+      {/* Salary adjustment toggle (only shown for custom cycle mode) */}
+      {mode === 'cycle' && (
+        <div className={styles.salaryAdjustSection}>
+          <label className={styles.salaryAdjustToggle}>
+            <input
+              type="checkbox"
+              checked={salaryAdj}
+              onChange={(e) => setSalaryAdj(e.target.checked)}
+              className={styles.salaryAdjustCheckbox}
+            />
+            <span className={styles.salaryAdjustLabel}>Sesuaikan hari libur</span>
+          </label>
+          <p className={styles.salaryAdjustDesc}>
+            Jika tanggal gajian jatuh di hari libur/weekend, periode akan dimulai dari hari kerja sebelumnya
+          </p>
+          {salaryAdj && adjustedPreview && (
+            <div className={styles.salaryAdjustPreview}>
+              <span className={styles.salaryAdjustPreviewLabel}>
+                {adjustedPreview.isAdjusted ? 'Tanggal disesuaikan:' : 'Tanggal tidak berubah:'}
+              </span>
+              <span className={styles.salaryAdjustPreviewDate}>{adjustedPreview.label}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Date range inputs (only shown for custom range mode) */}
+      {mode === 'range' && (
+        <>
+          <Field label="Tanggal Mulai">
+            <Input
+              type="date"
+              value={rangeStart}
+              onChange={handleRangeStartChange}
+            />
+          </Field>
+          <Field label="Tanggal Akhir" error={rangeError}>
+            <Input
+              type="date"
+              value={rangeEnd}
+              onChange={handleRangeEndChange}
+            />
+          </Field>
+        </>
+      )}
+
       <button
         className={styles.btnPrimary}
-        onClick={() => onSave(mode, mode === 'cycle' ? day : 1)}
+        style={isSaveDisabled ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+        disabled={isSaveDisabled}
+        onClick={handleSave}
       >
         Simpan Pengaturan
       </button>

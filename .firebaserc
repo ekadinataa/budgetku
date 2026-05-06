@@ -1,3 +1,5 @@
 {
-  "projects": {}
+  "projects": {
+    "default": "budgetku-app-v1"
+  }
 }

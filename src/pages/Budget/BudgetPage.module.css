@@ -586,7 +586,7 @@
 /* ── Period Mode Selector ───────────────────────────────────────────── */
 .periodModeRow {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 }
 
@@ -677,4 +677,261 @@
 .cycleExampleLabel {
   font-weight: 600;
   color: var(--text-4);
+}
+
+/* ── Salary Adjustment Toggle ────────────────────────────────────────── */
+.salaryAdjustSection {
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  background: var(--bg-2);
+  border-radius: 10px;
+  border: 1px solid var(--border-2);
+}
+
+.salaryAdjustToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.salaryAdjustCheckbox {
+  width: 16px;
+  height: 16px;
+  accent-color: #4F6EF7;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.salaryAdjustLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.salaryAdjustDesc {
+  font-size: 11px;
+  color: var(--text-5);
+  margin: 6px 0 0;
+  line-height: 1.5;
+}
+
+.salaryAdjustPreview {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: rgba(79, 110, 247, 0.06);
+  border-radius: 6px;
+  border: 1px solid rgba(79, 110, 247, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.salaryAdjustPreviewLabel {
+  font-size: 11px;
+  color: var(--text-5);
+  font-weight: 500;
+}
+
+.salaryAdjustPreviewDate {
+  font-size: 13px;
+  font-weight: 700;
+  color: #4F6EF7;
+}
+
+/* ── Salary Adjust Badge ────────────────────────────────────────────── */
+.salaryAdjustBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #4F6EF7;
+  background: rgba(79, 110, 247, 0.08);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+/* ── Mobile Responsive ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .catGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .pageTitle {
+    font-size: 18px;
+  }
+
+  .statValue {
+    font-size: 16px;
+  }
+
+  .sectionCard {
+    padding: 14px;
+  }
+
+  .distCard {
+    padding: 14px;
+  }
+}
+
+/* ── Period Transition Modal ────────────────────────────────────────── */
+.transitionPrevPeriod {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  background: var(--bg-2);
+  border-radius: 8px;
+  border: 1px solid var(--border-2);
+  margin-bottom: 16px;
+}
+
+.transitionPrevLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-5);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.transitionPrevDates {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-1);
+}
+
+.transitionOptionRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.transitionOption {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.transitionOption:hover {
+  border-color: var(--text-5);
+}
+
+.transitionOptionActive {
+  border-color: #4F6EF7;
+  background: rgba(79, 110, 247, 0.06);
+}
+
+.transitionRadio {
+  margin-top: 2px;
+  accent-color: #4F6EF7;
+  flex-shrink: 0;
+}
+
+.transitionOptionName {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-1);
+  margin-bottom: 2px;
+}
+
+.transitionOptionDesc {
+  font-size: 11px;
+  color: var(--text-5);
+  line-height: 1.4;
+}
+
+/* ── Period Ended Banner ────────────────────────────────────────────── */
+.periodEndedBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  background: #FFFBEB;
+  border: 1.5px solid #FCD34D;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.periodEndedContent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.periodEndedIcon {
+  font-size: 20px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.periodEndedText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.periodEndedTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #92400E;
+}
+
+.periodEndedDesc {
+  font-size: 12px;
+  color: #A16207;
+  line-height: 1.5;
+}
+
+.periodEndedBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  background: #F59E0B;
+  color: white;
+  white-space: nowrap;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.periodEndedBtn:hover {
+  background: #D97706;
+}
+
+@media (max-width: 768px) {
+  .periodEndedBanner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .periodEndedBtn {
+    width: 100%;
+    justify-content: center;
+  }
 }

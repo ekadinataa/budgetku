@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { id: 'tx', label: 'Transaksi', icon: 'tx' },
   { id: 'budget', label: 'Budget', icon: 'budget' },
   { id: 'report', label: 'Laporan', icon: 'report' },
+  { id: 'settings', label: 'Pengaturan', icon: 'settings' },
 ];
 
 /**
@@ -31,6 +32,7 @@ export default function Sidebar({ page, setPage, darkMode, setDarkMode, user, on
   const periodText = now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
 
   return (
+    <>
     <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''}`}>
       {/* Branding + collapse toggle */}
       <div className={styles.logo}>
@@ -146,5 +148,20 @@ export default function Sidebar({ page, setPage, darkMode, setDarkMode, user, on
         )}
       </div>
     </aside>
+
+    {/* Bottom navigation for mobile */}
+    <nav className={styles.bottomNav}>
+      {NAV_ITEMS.map((item) => (
+        <button
+          key={item.id}
+          onClick={() => setPage(item.id)}
+          className={`${styles.bottomNavItem} ${page === item.id ? styles.bottomNavItemActive : ''}`}
+        >
+          <NavIcon name={item.icon} size={20} />
+          <span className={styles.bottomNavLabel}>{item.label}</span>
+        </button>
+      ))}
+    </nav>
+    </>
   );
 }

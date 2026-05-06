@@ -15,10 +15,10 @@ import { fmt } from '../../utils/formatters';
  */
 export default function CompareBarChart({ a, b, prev }) {
   const max = Math.max(a.value, b.value, prev.value, 1);
-  const W = 280;
-  const H = 180;
-  const padTop = 28;
-  const padBot = 28;
+  const W = 320;
+  const H = 220;
+  const padTop = 32;
+  const padBot = 32;
   const barH = H - padTop - padBot;
 
   const bars = [
@@ -27,16 +27,17 @@ export default function CompareBarChart({ a, b, prev }) {
     { label: prev.label, value: prev.value, color: prev.color, dim: true },
   ];
 
-  const bw = 56;
-  const gap = 16;
-  const startX = 20;
+  const bw = 52;
+  const gap = 24;
+  const totalBarsWidth = bars.length * bw + (bars.length - 1) * gap;
+  const startX = (W - totalBarsWidth) / 2;
 
   return (
-    <svg width="100%" viewBox={`0 0 ${W} ${H}`}>
+    <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ maxHeight: 240 }}>
       <line x1="0" y1={padTop} x2={W} y2={padTop} stroke="var(--border-2)" strokeWidth="1" />
       <line x1="0" y1={H - padBot} x2={W} y2={H - padBot} stroke="var(--border)" strokeWidth="1" />
       {bars.map((bar, i) => {
-        const bh = Math.max((bar.value / max) * barH, bar.value > 0 ? 3 : 0);
+        const bh = Math.max((bar.value / max) * barH, bar.value > 0 ? 4 : 0);
         const x = startX + i * (bw + gap);
         const y = H - padBot - bh;
         return (
@@ -46,16 +47,16 @@ export default function CompareBarChart({ a, b, prev }) {
               y={y}
               width={bw}
               height={bh}
-              rx="5"
+              rx="6"
               fill={bar.color}
               fillOpacity={bar.dim ? 0.45 : 1}
             />
             {bar.value > 0 && (
               <text
                 x={x + bw / 2}
-                y={y - 5}
+                y={y - 6}
                 textAnchor="middle"
-                fontSize="10"
+                fontSize="11"
                 fontWeight="700"
                 fill={bar.dim ? 'var(--text-5)' : bar.color}
               >
@@ -64,7 +65,7 @@ export default function CompareBarChart({ a, b, prev }) {
             )}
             <text
               x={x + bw / 2}
-              y={H - 6}
+              y={H - 8}
               textAnchor="middle"
               fontSize="10"
               fill="var(--text-5)"

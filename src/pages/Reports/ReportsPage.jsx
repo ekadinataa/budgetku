@@ -199,14 +199,16 @@ export default function ReportsPage({
             <div className={styles.emptyState}>Tidak ada data</div>
           ) : (
             <div>
-              <PieChart
-                slices={topCats.map((x) => ({
-                  label: x.cat.name,
-                  value: x.amt,
-                  color: x.cat.color,
-                }))}
-                size={180}
-              />
+              <div className={styles.pieChartWrap}>
+                <PieChart
+                  slices={topCats.map((x) => ({
+                    label: x.cat.name,
+                    value: x.amt,
+                    color: x.cat.color,
+                  }))}
+                  size={180}
+                />
+              </div>
               <div style={{ marginTop: 16 }}>
                 {topCats.slice(0, 6).map((x) => (
                   <div key={x.cat.id} className={styles.legendRow}>

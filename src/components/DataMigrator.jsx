@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Modal from './Modal/Modal';
-import { migrateData } from '../services/api';
+import { migrateData } from '../services/firestoreService';
 import { STORAGE_KEY } from '../utils/constants';
 
 /**

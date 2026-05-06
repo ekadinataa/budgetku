@@ -375,3 +375,28 @@
   font-size: 11px;
   color: var(--text-5);
 }
+
+/* ── Mobile Responsive ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .statGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statValue {
+    font-size: 16px;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  .leftCol,
+  .rightCol {
+    gap: 14px;
+  }
+}

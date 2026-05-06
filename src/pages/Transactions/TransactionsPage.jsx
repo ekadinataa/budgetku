@@ -28,6 +28,7 @@ export default function TransactionsPage({ wallets, setWallets, transactions, se
   const [showAdd, setShowAdd] = useState(false);
   const [editTx, setEditTx] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [expandedTxId, setExpandedTxId] = useState(null);
 
   // All unique tags
   const allTags = useMemo(
@@ -344,7 +345,11 @@ export default function TransactionsPage({ wallets, setWallets, transactions, se
           const toW = t.toWalletId ? wallets.find((w) => w.id === t.toWalletId) : null;
 
           return (
-            <div key={t.id} className={styles.txRow}>
+            <div
+              key={t.id}
+              className={styles.txRow}
+              onClick={() => setExpandedTxId(expandedTxId === t.id ? null : t.id)}
+            >
               <div className={styles.txIcon} style={{ background: (cat?.color || 'var(--text-6)') + '20', color: cat?.color || 'var(--text-4)' }}>
                 {t.type === 'income' ? '↑' : t.type === 'transfer' ? '⇄' : '↓'}
               </div>
@@ -363,11 +368,11 @@ export default function TransactionsPage({ wallets, setWallets, transactions, se
               <div className={styles.txAmount}>
                 <AmountText type={t.type} amount={t.amount} />
               </div>
-              <div className={styles.txActions}>
-                <button className={styles.iconBtn} onClick={() => setEditTx(t)}>
+              <div className={`${styles.txActions} ${expandedTxId === t.id ? styles.txActionsVisible : ''}`}>
+                <button className={styles.iconBtn} onClick={(e) => { e.stopPropagation(); setEditTx(t); }}>
                   <NavIcon name="edit" size={15} />
                 </button>
-                <button className={styles.iconBtnDanger} onClick={() => handleDelete(t.id)}>
+                <button className={styles.iconBtnDanger} onClick={(e) => { e.stopPropagation(); handleDelete(t.id); }}>
                   <NavIcon name="trash" size={15} />
                 </button>
               </div>

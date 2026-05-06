@@ -454,3 +454,45 @@
   color: var(--text-5);
   white-space: nowrap;
 }
+
+/* ── Mobile Responsive ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .pageTitle {
+    font-size: 18px;
+  }
+
+  .summaryBar {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .dateFilterRow {
+    flex-wrap: wrap;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  .txActions {
+    display: none;
+  }
+
+  .txActionsVisible {
+    display: flex;
+  }
+
+  .filterCard {
+    padding: 14px;
+  }
+}

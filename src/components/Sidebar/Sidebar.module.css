@@ -289,3 +289,60 @@
   color: rgba(255, 255, 255, 0.7);
   white-space: nowrap;
 }
+
+/* ── Bottom Navigation (mobile) ────────────────────────────────────── */
+.bottomNav {
+  display: none;
+}
+
+.bottomNavItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 4px 8px;
+  color: rgba(255, 255, 255, 0.5);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.bottomNavItemActive {
+  color: #4F6EF7;
+}
+
+.bottomNavLabel {
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+/* ── Mobile Responsive (≤ 768px) ───────────────────────────────────── */
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+
+  .bottomNav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: var(--sidebar-bg);
+    z-index: 100;
+    justify-content: space-around;
+    align-items: center;
+  }
+}
+
+/* ── Landscape on Mobile ───────────────────────────────────────────── */
+@media (max-width: 768px) and (max-height: 500px) {
+  .bottomNav {
+    height: 48px;
+  }
+}

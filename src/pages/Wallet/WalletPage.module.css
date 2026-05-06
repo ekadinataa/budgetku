@@ -255,3 +255,32 @@
   color: var(--text-5);
   margin-top: 4px;
 }
+
+/* ── Mobile Responsive ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .groupGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .pageTitle {
+    font-size: 18px;
+  }
+
+  .summaryCard {
+    padding: 14px;
+  }
+
+  .summaryValue {
+    font-size: 18px;
+  }
+}

@@ -4,7 +4,7 @@
  * Ported from the prototype's shared.jsx with identical SVG paths and viewBox attributes.
  *
  * @param {Object} props
- * @param {string} props.name - Icon name (dashboard, wallet, tx, budget, report, plus, close, chevron, arrow, filter, search, edit, trash, transfer, warning, check, income, expense, sun, moon)
+ * @param {string} props.name - Icon name (dashboard, wallet, tx, budget, report, plus, close, chevron, arrow, filter, search, edit, trash, transfer, warning, check, income, expense, sun, moon, settings)
  * @param {number} [props.size=20] - Icon width and height in pixels
  * @param {Object} rest - Additional props spread onto the <svg> element
  */
@@ -118,6 +118,12 @@ export default function NavIcon({ name, size = 20, ...rest }) {
     moon: (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" {...rest}>
         <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+      </svg>
+    ),
+    settings: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" {...rest}>
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1.08-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1.08 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001.08 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1.08z" />
       </svg>
     ),
   };

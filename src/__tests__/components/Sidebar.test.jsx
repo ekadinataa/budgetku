@@ -17,25 +17,30 @@ describe('Sidebar', () => {
     expect(screen.getByText('Money Tracker')).toBeInTheDocument();
   });
 
-  it('renders all 5 navigation items', () => {
+  it('renders all 6 navigation items in both sidebar and bottom nav', () => {
     render(<Sidebar {...defaultProps} />);
-    expect(screen.getByText('Dashboard')).toBeInTheDocument();
-    expect(screen.getByText('Dompet')).toBeInTheDocument();
-    expect(screen.getByText('Transaksi')).toBeInTheDocument();
-    expect(screen.getByText('Budget')).toBeInTheDocument();
-    expect(screen.getByText('Laporan')).toBeInTheDocument();
+    // Each label appears twice: once in sidebar nav, once in bottom nav
+    expect(screen.getAllByText('Dashboard')).toHaveLength(2);
+    expect(screen.getAllByText('Dompet')).toHaveLength(2);
+    expect(screen.getAllByText('Transaksi')).toHaveLength(2);
+    expect(screen.getAllByText('Budget')).toHaveLength(2);
+    expect(screen.getAllByText('Laporan')).toHaveLength(2);
+    expect(screen.getAllByText('Pengaturan')).toHaveLength(2);
   });
 
   it('highlights the active navigation item', () => {
     render(<Sidebar {...defaultProps} page="wallet" />);
-    const walletBtn = screen.getByText('Dompet').closest('button');
-    expect(walletBtn.className).toContain('navItemActive');
+    // Get the sidebar nav button (first match)
+    const walletBtns = screen.getAllByText('Dompet').map((el) => el.closest('button'));
+    const sidebarBtn = walletBtns.find((btn) => btn.className.includes('navItem'));
+    expect(sidebarBtn.className).toContain('navItemActive');
   });
 
   it('calls setPage when a navigation item is clicked', () => {
     const setPage = vi.fn();
     render(<Sidebar {...defaultProps} setPage={setPage} />);
-    fireEvent.click(screen.getByText('Transaksi'));
+    // Click the first "Transaksi" (sidebar nav)
+    fireEvent.click(screen.getAllByText('Transaksi')[0]);
     expect(setPage).toHaveBeenCalledWith('tx');
   });
 
@@ -74,16 +79,16 @@ describe('Sidebar', () => {
     const setPage = vi.fn();
     render(<Sidebar {...defaultProps} setPage={setPage} />);
 
-    fireEvent.click(screen.getByText('Dashboard'));
+    fireEvent.click(screen.getAllByText('Dashboard')[0]);
     expect(setPage).toHaveBeenCalledWith('dashboard');
 
-    fireEvent.click(screen.getByText('Dompet'));
+    fireEvent.click(screen.getAllByText('Dompet')[0]);
     expect(setPage).toHaveBeenCalledWith('wallet');
 
-    fireEvent.click(screen.getByText('Budget'));
+    fireEvent.click(screen.getAllByText('Budget')[0]);
     expect(setPage).toHaveBeenCalledWith('budget');
 
-    fireEvent.click(screen.getByText('Laporan'));
+    fireEvent.click(screen.getAllByText('Laporan')[0]);
     expect(setPage).toHaveBeenCalledWith('report');
   });
 });

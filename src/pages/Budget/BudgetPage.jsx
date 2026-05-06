@@ -1,11 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import NavIcon from '../../components/icons/NavIcon';
 import ProgressBar from '../../components/ui/ProgressBar';
 import Select from '../../components/ui/Select';
 import IncomeModal from './IncomeModal';
 import SectionEditModal from './SectionEditModal';
 import PeriodModal from './PeriodModal';
-import { sectionLabel, sectionColor, getPeriodRange, filterByRange } from '../../utils/helpers';
+import PeriodTransitionModal from './PeriodTransitionModal';
+import { sectionLabel, sectionColor, getPeriodRange, filterByRange, getCustomRangeKey, findActiveRange, deepCloneBudget } from '../../utils/helpers';
 import { fmtFull, fmt, monthKey } from '../../utils/formatters';
 import { TODAY } from '../../data/defaults';
 import styles from './BudgetPage.module.css';
@@ -17,10 +18,20 @@ const EMPTY_BUDGET = {
 };
 
 /**
+ * Format a YYYY-MM-DD date string to Indonesian locale (e.g. "23 Mei 2026").
+ */
+function formatDateID(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+/**
  * BudgetPage — Monthly income allocation using the 50/30/20 rule.
  *
- * Now supports period selection: "Per Bulan" (standard calendar month)
- * or "Custom Siklus" (billing cycle based on salary date, e.g. 23–22).
+ * Supports three period modes:
+ * - "Per Bulan" (standard calendar month)
+ * - "Custom Siklus" (billing cycle based on salary date, e.g. 23–22)
+ * - "Custom Rentang" (user-defined start and end dates)
  */
 export default function BudgetPage({
   budgets,
@@ -30,23 +41,43 @@ export default function BudgetPage({
   setCategories,
   cycleStart,
   setCycleStart,
+  salaryAdjust,
+  setSalaryAdjust,
+  periodMode,
+  setPeriodMode,
+  customRanges,
+  setCustomRanges,
   onCreateCategory,
   onUpdateCategory,
 }) {
   const getCat = (id) => categories.find((c) => c.id === id);
   const currentMk = monthKey(new Date(TODAY));
 
-  // Period mode: 'month' or 'cycle'
-  const [periodMode, setPeriodMode] = useState(cycleStart > 1 ? 'cycle' : 'month');
+  // Internal state for month/cycle navigation
   const [selectedMk, setSelectedMk] = useState(currentMk);
   const [editSection, setEditSection] = useState(null);
   const [showIncome, setShowIncome] = useState(false);
   const [showPeriodModal, setShowPeriodModal] = useState(false);
 
-  // Build available month options from budgets + transactions
+  // Range mode internal state
+  const [selectedRangeId, setSelectedRangeId] = useState(null);
+  const [showTransition, setShowTransition] = useState(false);
+
+  // Auto-select active range on load or when switching to range mode
+  useEffect(() => {
+    if (periodMode === 'range' && customRanges.length > 0 && !selectedRangeId) {
+      const active = findActiveRange(customRanges, TODAY);
+      if (active) setSelectedRangeId(active.id);
+    }
+  }, [periodMode, customRanges, selectedRangeId]);
+
+  // Build available month options from budgets + transactions (for month/cycle modes)
   const monthOptions = useMemo(() => {
     const monthSet = new Set([currentMk]);
-    Object.keys(budgets).forEach((k) => monthSet.add(k));
+    Object.keys(budgets).forEach((k) => {
+      // Only include YYYY-MM keys, not range keys
+      if (/^\d{4}-\d{2}$/.test(k)) monthSet.add(k);
+    });
     transactions.forEach((t) => { if (t.date) monthSet.add(t.date.slice(0, 7)); });
     return [...monthSet].sort().reverse().map((mk) => {
       const [y, m] = mk.split('-').map(Number);
@@ -55,10 +86,35 @@ export default function BudgetPage({
     });
   }, [budgets, transactions, currentMk]);
 
+  // Build range options sorted by start date descending
+  const rangeOptions = useMemo(() => {
+    return [...customRanges]
+      .sort((a, b) => b.start.localeCompare(a.start))
+      .map((r) => ({
+        value: r.id,
+        label: `${formatDateID(r.start)} – ${formatDateID(r.end)}`,
+        range: r,
+      }));
+  }, [customRanges]);
+
+  // Get the currently selected range object
+  const selectedRange = useMemo(() => {
+    if (periodMode !== 'range') return null;
+    return customRanges.find((r) => r.id === selectedRangeId) || null;
+  }, [periodMode, customRanges, selectedRangeId]);
+
   // Compute the active date range based on period mode
   const periodRange = useMemo(() => {
+    if (periodMode === 'range' && selectedRange) {
+      const label = `${formatDateID(selectedRange.start)} – ${formatDateID(selectedRange.end)}`;
+      return {
+        start: selectedRange.start,
+        end: selectedRange.end,
+        label,
+      };
+    }
     if (periodMode === 'cycle' && cycleStart > 1) {
-      return getPeriodRange(selectedMk, cycleStart);
+      return getPeriodRange(selectedMk, cycleStart, salaryAdjust);
     }
     // Standard month
     const [y, m] = selectedMk.split('-').map(Number);
@@ -69,9 +125,17 @@ export default function BudgetPage({
       end: `${y}-${String(m).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`,
       label,
     };
-  }, [selectedMk, periodMode, cycleStart]);
+  }, [selectedMk, periodMode, cycleStart, salaryAdjust, selectedRange]);
 
-  const budget = budgets[selectedMk] || EMPTY_BUDGET;
+  // Determine the budget key based on mode
+  const budgetKey = useMemo(() => {
+    if (periodMode === 'range' && selectedRange) {
+      return getCustomRangeKey(selectedRange.start, selectedRange.end);
+    }
+    return selectedMk;
+  }, [periodMode, selectedRange, selectedMk]);
+
+  const budget = budgets[budgetKey] || EMPTY_BUDGET;
 
   // Compute totals
   const totalAllocated = Object.values(budget.sections).reduce((s, sec) => s + sec.total, 0);
@@ -96,10 +160,13 @@ export default function BudgetPage({
   });
   const totalSpent = Object.values(secSpend).reduce((s, v) => s + v, 0);
 
+  // Check if the active range period has ended (for transition prompt)
+  const periodEnded = periodMode === 'range' && selectedRange && TODAY > selectedRange.end;
+
   const handleSaveIncome = (income) => {
     setBudgets((b) => ({
       ...b,
-      [selectedMk]: { ...budget, totalIncome: parseFloat(income) || 0 },
+      [budgetKey]: { ...budget, totalIncome: parseFloat(income) || 0 },
     }));
     setShowIncome(false);
   };
@@ -107,7 +174,7 @@ export default function BudgetPage({
   const handleSaveSection = (section, data) => {
     setBudgets((b) => ({
       ...b,
-      [selectedMk]: {
+      [budgetKey]: {
         ...budget,
         sections: { ...budget.sections, [section]: data },
       },
@@ -115,20 +182,72 @@ export default function BudgetPage({
     setEditSection(null);
   };
 
-  const handleSavePeriod = (mode, cs) => {
-    setPeriodMode(mode);
-    if (mode === 'cycle') {
+  const handleSavePeriod = (mode, cs, sa, rangeStart, rangeEnd) => {
+    if (mode === 'range' && rangeStart && rangeEnd) {
+      // Create a new range definition
+      const newRangeId = getCustomRangeKey(rangeStart, rangeEnd);
+      const newRange = { id: newRangeId, start: rangeStart, end: rangeEnd };
+      // Add range if it doesn't already exist, then set mode — use direct state setters
+      // to avoid stale closure issues, and persist both together
+      const exists = customRanges.some((r) => r.id === newRangeId);
+      const updatedRanges = exists ? customRanges : [...customRanges, newRange];
+      setCustomRanges(updatedRanges);
+      setPeriodMode('range');
+      setSelectedRangeId(newRangeId);
+    } else if (mode === 'cycle') {
+      setPeriodMode('cycle');
       setCycleStart(cs);
+      setSalaryAdjust(sa);
     } else {
+      setPeriodMode('month');
       setCycleStart(1);
+      setSalaryAdjust(false);
     }
     setShowPeriodModal(false);
   };
 
+  // Handle creating a new period from the transition modal
+  const handleCreatePeriod = (newStart, newEnd, copyBudget) => {
+    const newRangeId = getCustomRangeKey(newStart, newEnd);
+    const newRange = { id: newRangeId, start: newStart, end: newEnd };
+
+    // Add the new range
+    setCustomRanges((prev) => [...prev, newRange]);
+
+    // Optionally copy budget from the previous period
+    if (copyBudget && selectedRange) {
+      const prevKey = getCustomRangeKey(selectedRange.start, selectedRange.end);
+      const prevBudget = budgets[prevKey];
+      if (prevBudget) {
+        const cloned = deepCloneBudget(prevBudget);
+        setBudgets((b) => ({ ...b, [newRangeId]: cloned }));
+      }
+    }
+
+    // Select the new range
+    setSelectedRangeId(newRangeId);
+    setShowTransition(false);
+  };
+
   // Period display label
-  const periodLabel = periodMode === 'cycle' && cycleStart > 1
-    ? `Siklus tgl ${cycleStart}: ${periodRange.label}`
-    : periodRange.label;
+  const periodLabel = useMemo(() => {
+    if (periodMode === 'range' && selectedRange) {
+      return `${formatDateID(selectedRange.start)} – ${formatDateID(selectedRange.end)}`;
+    }
+    if (periodMode === 'cycle' && cycleStart > 1) {
+      return `Siklus tgl ${cycleStart}: ${periodRange.label}`;
+    }
+    return periodRange.label;
+  }, [periodMode, selectedRange, cycleStart, periodRange]);
+
+  // Period button label
+  const periodButtonLabel = useMemo(() => {
+    if (periodMode === 'range') return 'Custom Rentang';
+    if (periodMode === 'cycle' && cycleStart > 1) return `Siklus tgl ${cycleStart}`;
+    return 'Per Bulan';
+  }, [periodMode, cycleStart]);
+
+  const showSalaryBadge = periodMode === 'cycle' && cycleStart > 1 && salaryAdjust;
 
   return (
     <div>
@@ -146,30 +265,68 @@ export default function BudgetPage({
               <circle cx="12" cy="12" r="9" />
               <path d="M12 7v5l3 3" />
             </svg>
-            {periodMode === 'cycle' && cycleStart > 1 ? `Siklus tgl ${cycleStart}` : 'Per Bulan'}
+            {periodButtonLabel}
           </button>
-          <Select
-            value={selectedMk}
-            onChange={(e) => setSelectedMk(e.target.value)}
-            style={{ width: 'auto' }}
-          >
-            {monthOptions.map((p) => (
-              <option key={p.value} value={p.value}>{p.label}</option>
-            ))}
-          </Select>
+          {periodMode === 'range' ? (
+            <Select
+              value={selectedRangeId || ''}
+              onChange={(e) => setSelectedRangeId(e.target.value)}
+              style={{ width: 'auto' }}
+            >
+              {rangeOptions.length === 0 && (
+                <option value="">Belum ada periode</option>
+              )}
+              {rangeOptions.map((p) => (
+                <option key={p.value} value={p.value}>{p.label}</option>
+              ))}
+            </Select>
+          ) : (
+            <Select
+              value={selectedMk}
+              onChange={(e) => setSelectedMk(e.target.value)}
+              style={{ width: 'auto' }}
+            >
+              {monthOptions.map((p) => (
+                <option key={p.value} value={p.value}>{p.label}</option>
+              ))}
+            </Select>
+          )}
           <button className={styles.btnGhost} onClick={() => setShowIncome(true)}>
             <NavIcon name="edit" size={15} /> Atur Pemasukan
           </button>
         </div>
       </div>
 
+      {/* Period-ended transition prompt */}
+      {periodEnded && (
+        <div className={styles.periodEndedBanner}>
+          <div className={styles.periodEndedContent}>
+            <span className={styles.periodEndedIcon}>⚠️</span>
+            <div className={styles.periodEndedText}>
+              <div className={styles.periodEndedTitle}>Periode telah berakhir</div>
+              <div className={styles.periodEndedDesc}>
+                Periode {formatDateID(selectedRange.start)} – {formatDateID(selectedRange.end)} telah berakhir. Buat periode baru untuk melanjutkan pencatatan.
+              </div>
+            </div>
+          </div>
+          <button className={styles.periodEndedBtn} onClick={() => setShowTransition(true)}>
+            Buat Periode Baru
+          </button>
+        </div>
+      )}
+
       {/* Period info bar */}
       <div className={styles.periodBar}>
         <span className={styles.periodBarLabel}>Periode aktif:</span>
         <span className={styles.periodBarValue}>{periodLabel}</span>
-        <span className={styles.periodBarRange}>
-          ({periodRange.start} s/d {periodRange.end})
-        </span>
+        {showSalaryBadge && (
+          <span className={styles.salaryAdjustBadge}>📅 Disesuaikan</span>
+        )}
+        {periodMode !== 'range' && (
+          <span className={styles.periodBarRange}>
+            ({periodRange.start} s/d {periodRange.end})
+          </span>
+        )}
       </div>
 
       {/* Overview Stats */}
@@ -353,8 +510,16 @@ export default function BudgetPage({
         <PeriodModal
           currentMode={periodMode}
           currentCycleStart={cycleStart}
+          currentSalaryAdjust={salaryAdjust}
           onClose={() => setShowPeriodModal(false)}
           onSave={handleSavePeriod}
+        />
+      )}
+      {showTransition && selectedRange && (
+        <PeriodTransitionModal
+          previousPeriod={selectedRange}
+          onClose={() => setShowTransition(false)}
+          onCreatePeriod={handleCreatePeriod}
         />
       )}
     </div>

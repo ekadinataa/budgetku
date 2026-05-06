@@ -310,3 +310,41 @@
   color: var(--text-6);
   font-size: 13px;
 }
+
+/* ── Mobile Responsive ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .cashGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .chartsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .pageTitle {
+    font-size: 18px;
+  }
+
+  .cashCardValue {
+    font-size: 18px;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  .cashCard {
+    padding: 14px;
+  }
+
+  .pieChartWrap {
+    max-width: 160px;
+    margin: 0 auto;
+  }
+}

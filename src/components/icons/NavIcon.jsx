@@ -120,6 +120,26 @@ export default function NavIcon({ name, size = 20, ...rest }) {
         <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
       </svg>
     ),
+    recurring: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" {...rest}>
+        <path d="M17 2l4 4-4 4" />
+        <path d="M3 11V9a4 4 0 014-4h14" />
+        <path d="M7 22l-4-4 4-4" />
+        <path d="M21 13v2a4 4 0 01-4 4H3" />
+      </svg>
+    ),
+    debt: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" {...rest}>
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+        <path d="M14 2v6h6" />
+        <path d="M9 13h6M9 17h4" />
+      </svg>
+    ),
+    invest: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" {...rest}>
+        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+      </svg>
+    ),
     settings: (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" {...rest}>
         <circle cx="12" cy="12" r="3" />

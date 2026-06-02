@@ -7,6 +7,11 @@ import {
   getPeriodRange,
   filterByRange,
 } from '../../utils/helpers';
+import {
+  getTotalAmortizedCost,
+  getAmortizedByCategory,
+  getAmortizedBySection,
+} from '../../utils/recurring';
 import NavIcon from '../../components/icons/NavIcon';
 import Select from '../../components/ui/Select';
 import ProgressBar from '../../components/ui/ProgressBar';
@@ -40,6 +45,7 @@ export default function ReportsPage({
   cycleStart,
   setCycleStart,
   categories,
+  recurringItems = [],
 }) {
   const getCat = (id) => getCatById(id, categories);
 
@@ -67,6 +73,7 @@ export default function ReportsPage({
 
   const [period, setPeriod] = useState(allPeriods[0]?.value || currentMk);
   const [showCycleDlg, setShowCycleDlg] = useState(false);
+  const [viewMode, setViewMode] = useState('actual'); // 'actual' | 'amortized'
 
   // Current period range
   const range = getPeriodRange(period, cycleStart);
@@ -379,6 +386,105 @@ export default function ReportsPage({
           );
         })}
       </div>
+
+      {/* Amortized Recurring Items Analysis */}
+      {recurringItems.length > 0 && (
+        <div className={styles.card} style={{ marginTop: 24 }}>
+          <div className={styles.perfHeader}>
+            <h3 className={styles.cardTitle} style={{ margin: 0 }}>
+              📦 Biaya Berkala (Amortized)
+            </h3>
+            <span className={styles.perfSubtitle}>biaya bulanan sebenarnya dari item berkala</span>
+          </div>
+
+          {/* Amortized summary by section */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, margin: '16px 0' }}>
+            {['needs', 'wants', 'savings'].map((sec) => {
+              const amortizedSections = getAmortizedBySection(recurringItems, categories);
+              const val = amortizedSections[sec] || 0;
+              return (
+                <div key={sec} style={{
+                  padding: '12px 16px',
+                  background: sectionColor(sec) + '10',
+                  borderRadius: 10,
+                  border: `1px solid ${sectionColor(sec)}30`,
+                }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-4)', textTransform: 'uppercase', marginBottom: 4 }}>
+                    {sectionLabel(sec)}
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: sectionColor(sec) }}>
+                    {fmtFull(Math.round(val))}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text-4)' }}>/bulan</div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Total */}
+          <div style={{
+            padding: '12px 16px',
+            background: 'var(--bg-3)',
+            borderRadius: 10,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 16,
+          }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-2)' }}>
+              Total Biaya Berkala/Bulan
+            </span>
+            <span style={{ fontSize: 16, fontWeight: 700, color: '#4F6EF7' }}>
+              {fmtFull(Math.round(getTotalAmortizedCost(recurringItems)))}
+            </span>
+          </div>
+
+          {/* Per-category breakdown */}
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-4)', textTransform: 'uppercase', marginBottom: 8 }}>
+            Breakdown per Kategori
+          </div>
+          {getAmortizedByCategory(recurringItems, categories).map((item) => (
+            <div key={item.categoryId} style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '8px 0',
+              borderBottom: '1px solid var(--border-2)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.color }} />
+                <span style={{ fontSize: 13, color: 'var(--text-2)' }}>{item.categoryName}</span>
+              </div>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-1)' }}>
+                {fmtFull(Math.round(item.monthlyCost))}/bln
+              </span>
+            </div>
+          ))}
+
+          {/* Comparison with actual spending */}
+          <div style={{
+            marginTop: 16,
+            padding: '12px 16px',
+            background: '#EFF6FF',
+            borderRadius: 10,
+            border: '1px solid #BFDBFE',
+          }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#1D4ED8', marginBottom: 4 }}>
+              💡 Perbandingan
+            </div>
+            <div style={{ fontSize: 12, color: '#1E40AF', lineHeight: 1.5 }}>
+              Pengeluaran aktual bulan ini: <strong>{fmtFull(expense)}</strong>
+              <br />
+              Biaya berkala (amortized): <strong>{fmtFull(Math.round(getTotalAmortizedCost(recurringItems)))}</strong>
+              <br />
+              True monthly cost (aktual + amortized berkala yang belum dibeli bulan ini):{' '}
+              <strong>{fmtFull(Math.round(expense + getTotalAmortizedCost(recurringItems) -
+                recurringItems.filter(i => i.isActive && i.lastPurchaseDate && i.lastPurchaseDate.startsWith(period)).reduce((s, i) => s + i.amount, 0)
+              ))}</strong>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Cycle setting modal */}
       {showCycleDlg && (

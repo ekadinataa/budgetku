@@ -8,6 +8,9 @@ import Dashboard from './pages/Dashboard/Dashboard';
 import WalletPage from './pages/Wallet/WalletPage';
 import TransactionsPage from './pages/Transactions/TransactionsPage';
 import BudgetPage from './pages/Budget/BudgetPage';
+import RecurringPage from './pages/Recurring/RecurringPage';
+import DebtPage from './pages/Debt/DebtPage';
+import InvestmentPage from './pages/Investment/InvestmentPage';
 import ReportsPage from './pages/Reports/ReportsPage';
 import SettingsPage from './pages/Settings/SettingsPage';
 import TxFormModal from './pages/Transactions/TxFormModal';
@@ -16,6 +19,10 @@ import RegisterPage from './pages/Auth/RegisterPage';
 import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
 import { STORAGE_KEY } from './utils/constants';
 import { WALLETS_INIT, TRANSACTIONS_INIT, BUDGETS_INIT, CATEGORIES } from './data/defaults';
+import { buildDebtTransaction, applyPayment } from './utils/debtHelpers';
+import { validateDebt, validatePayment } from './services/debtValidator';
+import { buildInvestmentTransaction, computeTotalUnits } from './utils/investmentHelpers';
+import { validateInvestment, validateInvestmentTransaction, validateCurrentValue } from './services/investmentValidator';
 import * as api from './services/firestoreService';
 import { computeAppend } from './services/importService';
 import './App.css';
@@ -50,6 +57,9 @@ function App() {
   const [salaryAdjust, setSalaryAdjust] = useState(savedLocal?.salaryAdjust || false);
   const [periodMode, setPeriodMode] = useState(savedLocal?.periodMode || 'month');
   const [customRanges, setCustomRanges] = useState(savedLocal?.customRanges || []);
+  const [recurringItems, setRecurringItems] = useState(savedLocal?.recurringItems || []);
+  const [debts, setDebts] = useState(savedLocal?.debts || []);
+  const [investments, setInvestments] = useState(savedLocal?.investments || []);
 
   // Loading & error states
   const [dataLoading, setDataLoading] = useState(false);
@@ -67,9 +77,9 @@ function App() {
   useEffect(() => {
     if (!IS_LOCAL_MODE) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      page, wallets, transactions, budgets, categories, darkMode, cycleStart, salaryAdjust, periodMode, customRanges,
+      page, wallets, transactions, budgets, categories, darkMode, cycleStart, salaryAdjust, periodMode, customRanges, recurringItems, debts, investments,
     }));
-  }, [page, wallets, transactions, budgets, categories, darkMode, cycleStart, salaryAdjust, periodMode, customRanges]);
+  }, [page, wallets, transactions, budgets, categories, darkMode, cycleStart, salaryAdjust, periodMode, customRanges, recurringItems, debts, investments]);
 
   // Show toast notification
   const showToast = useCallback((msg) => {
@@ -85,15 +95,21 @@ function App() {
       // Initialize default data for new users (no-op if already initialized)
       await api.initUser();
 
-      const [walletsData, txData, budgetsData, catsData, prefsData] = await Promise.all([
+      const [walletsData, txData, budgetsData, catsData, prefsData, recurringData, debtsData, investmentsData] = await Promise.all([
         api.getWallets(),
         api.getTransactions(),
         api.getBudgets(),
         api.getCategories(),
         api.getPreferences(),
+        api.getRecurringItems(),
+        api.getDebts(),
+        api.getInvestments(),
       ]);
       setWallets(walletsData);
       setTransactions(txData);
+      setRecurringItems(recurringData);
+      setDebts(debtsData);
+      setInvestments(investmentsData);
       // budgets come as array from API, convert to object keyed by monthKey
       if (Array.isArray(budgetsData)) {
         const budgetMap = {};
@@ -449,6 +465,489 @@ function App() {
     }
   };
 
+  // ── Recurring Items handlers ───────────────────────────────────────
+
+  /** Create a recurring item via API (or locally) and update local state */
+  const handleCreateRecurringItem = async (data) => {
+    if (IS_LOCAL_MODE) {
+      const created = { id: 'ri_' + Date.now(), ...data, isActive: true, createdAt: new Date().toISOString().slice(0, 10) };
+      setRecurringItems((items) => [...items, created]);
+      showToast('Item berkala berhasil ditambahkan.');
+      return created;
+    }
+    try {
+      const created = await api.createRecurringItem(data);
+      setRecurringItems((items) => [...items, created]);
+      showToast('Item berkala berhasil ditambahkan.');
+      return created;
+    } catch (err) {
+      showToast(err.message || 'Gagal membuat item berkala.');
+      throw err;
+    }
+  };
+
+  /** Update a recurring item via API (or locally) and update local state */
+  const handleUpdateRecurringItem = async (id, data) => {
+    if (IS_LOCAL_MODE) {
+      setRecurringItems((items) => items.map((i) => (i.id === id ? { ...i, ...data } : i)));
+      return { id, ...data };
+    }
+    try {
+      await api.updateRecurringItem(id, data);
+      setRecurringItems((items) => items.map((i) => (i.id === id ? { ...i, ...data } : i)));
+      return { id, ...data };
+    } catch (err) {
+      showToast(err.message || 'Gagal mengubah item berkala.');
+      throw err;
+    }
+  };
+
+  /** Delete a recurring item via API (or locally) and update local state */
+  const handleDeleteRecurringItem = async (id) => {
+    if (IS_LOCAL_MODE) {
+      setRecurringItems((items) => items.filter((i) => i.id !== id));
+      showToast('Item berkala berhasil dihapus.');
+      return;
+    }
+    try {
+      await api.deleteRecurringItem(id);
+      setRecurringItems((items) => items.filter((i) => i.id !== id));
+      showToast('Item berkala berhasil dihapus.');
+    } catch (err) {
+      showToast(err.message || 'Gagal menghapus item berkala.');
+      throw err;
+    }
+  };
+
+  /** Handle repurchase: update item dates + optionally create transaction */
+  const handleRepurchaseItem = async (id, repurchaseData) => {
+    const { purchaseDate, amount, walletId, createTransaction, nextEstimateDate } = repurchaseData;
+
+    // Update the recurring item
+    const updateData = {
+      lastPurchaseDate: purchaseDate,
+      nextEstimateDate,
+      amount, // Update price if changed
+    };
+    await handleUpdateRecurringItem(id, updateData);
+
+    // Optionally create a transaction
+    if (createTransaction && walletId) {
+      const item = recurringItems.find((i) => i.id === id);
+      const txData = {
+        date: purchaseDate,
+        walletId,
+        type: 'expense',
+        categoryId: item?.categoryId || '',
+        amount,
+        note: `Beli ulang: ${item?.name || 'Item berkala'}`,
+        tags: ['berkala', ...(item?.tags || [])],
+      };
+      await handleCreateTransaction(txData);
+    }
+
+    showToast('Pembelian ulang berhasil dicatat.');
+  };
+
+  // ── Debt handlers ──────────────────────────────────────────────────
+
+  /** Create a debt record via API (or locally) and generate a transaction */
+  const handleCreateDebt = async (data) => {
+    const error = validateDebt(data);
+    if (error) {
+      showToast(error);
+      throw new Error(error);
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    const debtData = {
+      type: data.type,
+      personName: data.personName.trim(),
+      totalAmount: Number(data.totalAmount),
+      remainingAmount: Number(data.totalAmount),
+      walletId: data.walletId,
+      dueDate: data.dueDate || '',
+      description: data.description || '',
+      status: 'active',
+      payments: [],
+      transactionId: '',
+      createdAt: today,
+      // Interest/annuity fields
+      interestEnabled: data.interestEnabled || false,
+      interestRate: data.interestRate || 0,
+      tenorMonths: data.tenorMonths || 0,
+      startDate: data.startDate || '',
+      monthlyInstallment: data.monthlyInstallment || 0,
+      // Note: schedule is NOT stored in Firestore — generated on-the-fly in UI
+    };
+
+    // Generate the associated transaction
+    const txData = buildDebtTransaction('create', debtData, debtData.totalAmount, debtData.walletId);
+
+    let createdTx;
+    try {
+      createdTx = await handleCreateTransaction(txData);
+    } catch (err) {
+      showToast('Gagal membuat transaksi utang/piutang.');
+      throw err;
+    }
+
+    debtData.transactionId = createdTx?.id || '';
+
+    if (IS_LOCAL_MODE) {
+      const created = { id: 'debt_' + Date.now(), ...debtData };
+      setDebts((ds) => [...ds, created]);
+      showToast('Utang/piutang berhasil ditambahkan.');
+      return created;
+    }
+
+    try {
+      const created = await api.createDebt(debtData);
+      setDebts((ds) => [...ds, created]);
+      showToast('Utang/piutang berhasil ditambahkan.');
+      return created;
+    } catch (err) {
+      showToast(err.message || 'Gagal membuat utang/piutang.');
+      throw err;
+    }
+  };
+
+  /** Update a debt record via API (or locally) */
+  const handleUpdateDebt = async (id, data) => {
+    if (IS_LOCAL_MODE) {
+      setDebts((ds) => ds.map((d) => (d.id === id ? { ...d, ...data } : d)));
+      showToast('Utang/piutang berhasil diubah.');
+      return { id, ...data };
+    }
+    try {
+      await api.updateDebt(id, data);
+      setDebts((ds) => ds.map((d) => (d.id === id ? { ...d, ...data } : d)));
+      showToast('Utang/piutang berhasil diubah.');
+      return { id, ...data };
+    } catch (err) {
+      showToast(err.message || 'Gagal mengubah utang/piutang.');
+      throw err;
+    }
+  };
+
+  /** Delete a debt record via API (or locally) */
+  const handleDeleteDebt = async (id) => {
+    if (IS_LOCAL_MODE) {
+      setDebts((ds) => ds.filter((d) => d.id !== id));
+      showToast('Utang/piutang berhasil dihapus.');
+      return;
+    }
+    try {
+      await api.deleteDebt(id);
+      setDebts((ds) => ds.filter((d) => d.id !== id));
+      showToast('Utang/piutang berhasil dihapus.');
+    } catch (err) {
+      showToast(err.message || 'Gagal menghapus utang/piutang.');
+      throw err;
+    }
+  };
+
+  /** Record a payment against a debt record */
+  const handleRecordPayment = async (debtId, paymentData) => {
+    const debt = debts.find((d) => d.id === debtId);
+    if (!debt) {
+      showToast('Data utang/piutang tidak ditemukan.');
+      return;
+    }
+
+    // For annuity payments, only the principal part reduces remainingAmount
+    const isAnnuity = paymentData.isAnnuityPayment && (debt.interestEnabled || (debt.interestRate > 0 && debt.tenorMonths > 0));
+    const principalReduction = isAnnuity ? paymentData.principalPart : paymentData.amount;
+
+    // Validate: for non-annuity, use standard validation
+    if (!isAnnuity) {
+      const error = validatePayment(paymentData, debt.remainingAmount);
+      if (error) {
+        showToast(error);
+        throw new Error(error);
+      }
+    }
+
+    // Generate the payment transaction (full amount leaves wallet)
+    const txData = buildDebtTransaction('payment', debt, paymentData.amount, paymentData.walletId || debt.walletId);
+    txData.date = paymentData.date;
+
+    // For annuity, add breakdown info to the note
+    if (isAnnuity) {
+      txData.note += ` (Pokok: ${paymentData.principalPart}, Bunga: ${paymentData.interestPart})`;
+    }
+
+    let createdTx;
+    try {
+      createdTx = await handleCreateTransaction(txData);
+    } catch (err) {
+      showToast('Gagal membuat transaksi pembayaran.');
+      throw err;
+    }
+
+    // Apply payment to debt record — for annuity, only principal reduces remaining
+    const paymentEntry = {
+      amount: paymentData.amount, // Total paid (for history display)
+      principalPart: isAnnuity ? paymentData.principalPart : paymentData.amount,
+      interestPart: isAnnuity ? paymentData.interestPart : 0,
+      date: paymentData.date,
+      note: paymentData.note || '',
+      walletId: paymentData.walletId,
+      transactionId: createdTx?.id || '',
+    };
+
+    // Calculate new remaining (only principal reduces it)
+    const newRemaining = Math.max(0, debt.remainingAmount - principalReduction);
+    const newPayments = [...(debt.payments || []), paymentEntry];
+    const newStatus = newRemaining <= 0 ? 'settled' : 'active';
+
+    // Persist the updated debt
+    const updateData = {
+      remainingAmount: newRemaining,
+      payments: newPayments,
+      status: newStatus,
+    };
+
+    if (IS_LOCAL_MODE) {
+      setDebts((ds) => ds.map((d) => (d.id === debtId ? { ...d, ...updateData } : d)));
+      showToast('Pembayaran berhasil dicatat.');
+      return;
+    }
+
+    try {
+      await api.updateDebt(debtId, updateData);
+      setDebts((ds) => ds.map((d) => (d.id === debtId ? { ...d, ...updateData } : d)));
+      showToast('Pembayaran berhasil dicatat.');
+    } catch (err) {
+      showToast(err.message || 'Gagal mencatat pembayaran.');
+      throw err;
+    }
+  };
+
+  // ── Investment handlers ──────────────────────────────────────────────
+
+  /** Create an investment record */
+  const handleCreateInvestment = async (data) => {
+    const error = validateInvestment(data);
+    if (error) {
+      showToast(error);
+      throw new Error(error);
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    const investmentData = {
+      ...data,
+      currentValue: 0,
+      transactions: [],
+      createdAt: today,
+      lastUpdated: today,
+    };
+
+    if (IS_LOCAL_MODE) {
+      const created = { id: 'inv_' + Date.now(), ...investmentData };
+      setInvestments((items) => [...items, created]);
+      showToast('Investasi berhasil ditambahkan.');
+      return created;
+    }
+
+    try {
+      const created = await api.createInvestment(investmentData);
+      setInvestments((items) => [...items, created]);
+      showToast('Investasi berhasil ditambahkan.');
+      return created;
+    } catch (err) {
+      showToast(err.message || 'Gagal membuat investasi.');
+      throw err;
+    }
+  };
+
+  /** Update an investment record */
+  const handleUpdateInvestment = async (id, data) => {
+    if (IS_LOCAL_MODE) {
+      setInvestments((items) => items.map((i) => (i.id === id ? { ...i, ...data } : i)));
+      showToast('Investasi berhasil diubah.');
+      return { id, ...data };
+    }
+    try {
+      await api.updateInvestment(id, data);
+      setInvestments((items) => items.map((i) => (i.id === id ? { ...i, ...data } : i)));
+      showToast('Investasi berhasil diubah.');
+      return { id, ...data };
+    } catch (err) {
+      showToast(err.message || 'Gagal mengubah investasi.');
+      throw err;
+    }
+  };
+
+  /** Delete an investment record */
+  const handleDeleteInvestment = async (id) => {
+    if (IS_LOCAL_MODE) {
+      setInvestments((items) => items.filter((i) => i.id !== id));
+      showToast('Investasi berhasil dihapus.');
+      return;
+    }
+    try {
+      await api.deleteInvestment(id);
+      setInvestments((items) => items.filter((i) => i.id !== id));
+      showToast('Investasi berhasil dihapus.');
+    } catch (err) {
+      showToast(err.message || 'Gagal menghapus investasi.');
+      throw err;
+    }
+  };
+
+  /** Record a buy transaction for an investment */
+  const handleRecordBuy = async (investmentId, txData) => {
+    const investment = investments.find((i) => i.id === investmentId);
+    if (!investment) {
+      showToast('Data investasi tidak ditemukan.');
+      return;
+    }
+
+    const error = validateInvestmentTransaction(txData, 'buy');
+    if (error) {
+      showToast(error);
+      throw new Error(error);
+    }
+
+    // Generate wallet transaction
+    const walletTxData = buildInvestmentTransaction('buy', investment, txData.totalAmount, txData.walletId);
+    walletTxData.date = txData.date;
+
+    let createdTx;
+    try {
+      createdTx = await handleCreateTransaction(walletTxData);
+    } catch (err) {
+      showToast('Gagal membuat transaksi pembelian.');
+      throw err;
+    }
+
+    // Add investment transaction entry
+    const invTx = {
+      id: 'itx_' + Date.now(),
+      type: 'buy',
+      date: txData.date,
+      units: txData.units,
+      pricePerUnit: txData.pricePerUnit,
+      totalAmount: txData.totalAmount,
+      walletId: txData.walletId,
+      note: txData.note || '',
+      walletTxId: createdTx?.id || '',
+    };
+
+    const updatedTransactions = [...(investment.transactions || []), invTx];
+    const updateData = {
+      transactions: updatedTransactions,
+      lastUpdated: new Date().toISOString().slice(0, 10),
+    };
+
+    if (IS_LOCAL_MODE) {
+      setInvestments((items) => items.map((i) => (i.id === investmentId ? { ...i, ...updateData } : i)));
+      showToast('Pembelian berhasil dicatat.');
+      return;
+    }
+
+    try {
+      await api.updateInvestment(investmentId, updateData);
+      setInvestments((items) => items.map((i) => (i.id === investmentId ? { ...i, ...updateData } : i)));
+      showToast('Pembelian berhasil dicatat.');
+    } catch (err) {
+      showToast(err.message || 'Gagal mencatat pembelian.');
+      throw err;
+    }
+  };
+
+  /** Record a sell transaction for an investment */
+  const handleRecordSell = async (investmentId, txData) => {
+    const investment = investments.find((i) => i.id === investmentId);
+    if (!investment) {
+      showToast('Data investasi tidak ditemukan.');
+      return;
+    }
+
+    const maxUnits = computeTotalUnits(investment.transactions || []);
+    const error = validateInvestmentTransaction(txData, 'sell', maxUnits);
+    if (error) {
+      showToast(error);
+      throw new Error(error);
+    }
+
+    // Generate wallet transaction
+    const walletTxData = buildInvestmentTransaction('sell', investment, txData.totalAmount, txData.walletId);
+    walletTxData.date = txData.date;
+
+    let createdTx;
+    try {
+      createdTx = await handleCreateTransaction(walletTxData);
+    } catch (err) {
+      showToast('Gagal membuat transaksi penjualan.');
+      throw err;
+    }
+
+    // Add investment transaction entry
+    const invTx = {
+      id: 'itx_' + Date.now(),
+      type: 'sell',
+      date: txData.date,
+      units: txData.units,
+      pricePerUnit: txData.pricePerUnit,
+      totalAmount: txData.totalAmount,
+      walletId: txData.walletId,
+      note: txData.note || '',
+      walletTxId: createdTx?.id || '',
+    };
+
+    const updatedTransactions = [...(investment.transactions || []), invTx];
+    const updateData = {
+      transactions: updatedTransactions,
+      lastUpdated: new Date().toISOString().slice(0, 10),
+    };
+
+    if (IS_LOCAL_MODE) {
+      setInvestments((items) => items.map((i) => (i.id === investmentId ? { ...i, ...updateData } : i)));
+      showToast('Penjualan berhasil dicatat.');
+      return;
+    }
+
+    try {
+      await api.updateInvestment(investmentId, updateData);
+      setInvestments((items) => items.map((i) => (i.id === investmentId ? { ...i, ...updateData } : i)));
+      showToast('Penjualan berhasil dicatat.');
+    } catch (err) {
+      showToast(err.message || 'Gagal mencatat penjualan.');
+      throw err;
+    }
+  };
+
+  /** Update current value of an investment */
+  const handleUpdateInvestmentValue = async (investmentId, value) => {
+    const error = validateCurrentValue(value);
+    if (error) {
+      showToast(error);
+      throw new Error(error);
+    }
+
+    const updateData = {
+      currentValue: value,
+      lastUpdated: new Date().toISOString().slice(0, 10),
+    };
+
+    if (IS_LOCAL_MODE) {
+      setInvestments((items) => items.map((i) => (i.id === investmentId ? { ...i, ...updateData } : i)));
+      showToast('Nilai investasi berhasil diperbarui.');
+      return;
+    }
+
+    try {
+      await api.updateInvestment(investmentId, updateData);
+      setInvestments((items) => items.map((i) => (i.id === investmentId ? { ...i, ...updateData } : i)));
+      showToast('Nilai investasi berhasil diperbarui.');
+    } catch (err) {
+      showToast(err.message || 'Gagal memperbarui nilai investasi.');
+      throw err;
+    }
+  };
+
   /** Reset all user data, reload defaults, and navigate to dashboard */
   const handleResetData = async () => {
     await api.resetUserData();
@@ -659,6 +1158,9 @@ function App() {
             setPage={setPage}
             onAddTx={onAddTx}
             categories={categories}
+            recurringItems={recurringItems}
+            debts={debts}
+            investments={investments}
           />
         );
       case 'wallet':
@@ -707,6 +1209,43 @@ function App() {
             onCreateCategory={handleCreateCategory}
             onUpdateCategory={handleUpdateCategory}
             onDeleteCategory={handleDeleteCategory}
+            recurringItems={recurringItems}
+          />
+        );
+      case 'recurring':
+        return (
+          <RecurringPage
+            recurringItems={recurringItems}
+            categories={categories}
+            wallets={wallets}
+            onCreateItem={handleCreateRecurringItem}
+            onUpdateItem={handleUpdateRecurringItem}
+            onDeleteItem={handleDeleteRecurringItem}
+            onRepurchase={handleRepurchaseItem}
+          />
+        );
+      case 'debt':
+        return (
+          <DebtPage
+            debts={debts}
+            wallets={wallets}
+            onCreateDebt={handleCreateDebt}
+            onUpdateDebt={handleUpdateDebt}
+            onDeleteDebt={handleDeleteDebt}
+            onRecordPayment={handleRecordPayment}
+          />
+        );
+      case 'invest':
+        return (
+          <InvestmentPage
+            investments={investments}
+            wallets={wallets}
+            onCreateInvestment={handleCreateInvestment}
+            onUpdateInvestment={handleUpdateInvestment}
+            onDeleteInvestment={handleDeleteInvestment}
+            onRecordBuy={handleRecordBuy}
+            onRecordSell={handleRecordSell}
+            onUpdateValue={handleUpdateInvestmentValue}
           />
         );
       case 'report':
@@ -719,6 +1258,7 @@ function App() {
             setCycleStart={handleSetCycleStart}
             salaryAdjust={salaryAdjust}
             categories={categories}
+            recurringItems={recurringItems}
           />
         );
       case 'settings':

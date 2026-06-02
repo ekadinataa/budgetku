@@ -7,12 +7,15 @@ import {
   walletTypeLabel,
   getRecentTransactions,
 } from '../../utils/helpers';
+import { groupByStatus, formatDaysRemaining } from '../../utils/recurring';
 import ProgressBar from '../../components/ui/ProgressBar';
 import AmountText from '../../components/ui/AmountText';
 import NavIcon from '../../components/icons/NavIcon';
 import WalletIcon from '../../components/ui/WalletIcon';
 import StatCard from './StatCard';
 import Calendar from './Calendar';
+import DebtWidget from './DebtWidget';
+import InvestmentWidget from './InvestmentWidget';
 import styles from './Dashboard.module.css';
 
 /**
@@ -38,6 +41,9 @@ export default function Dashboard({
   setPage,
   onAddTx,
   categories,
+  recurringItems = [],
+  debts = [],
+  investments = [],
 }) {
   const today = new Date();
   const mk = monthKey(today);
@@ -216,6 +222,60 @@ export default function Dashboard({
           <button className={styles.addTxBtn} onClick={onAddTx}>
             <NavIcon name="plus" size={18} /> Tambah Transaksi
           </button>
+
+          {/* Restock reminder widget */}
+          {recurringItems.length > 0 && (() => {
+            const { needsRestock } = groupByStatus(recurringItems);
+            if (needsRestock.length === 0) return null;
+            return (
+              <div className={styles.card}>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.cardTitle}>🔔 Restock Segera ({needsRestock.length})</h3>
+                  <button className={styles.linkBtn} onClick={() => setPage('recurring')}>
+                    Lihat Semua
+                  </button>
+                </div>
+                {needsRestock.slice(0, 4).map((item) => {
+                  const cat = getCatById(item.categoryId, categories);
+                  return (
+                    <div key={item.id} className={styles.recentRow}>
+                      <div
+                        className={styles.recentIcon}
+                        style={{
+                          background: (cat?.color || '#94A3B8') + '18',
+                          color: cat?.color || '#94A3B8',
+                        }}
+                      >
+                        {item.name.charAt(0)}
+                      </div>
+                      <div className={styles.recentInfo}>
+                        <div className={styles.recentNote}>{item.name}</div>
+                        <div className={styles.recentMeta}>
+                          {formatDaysRemaining(item._daysLeft)}
+                        </div>
+                      </div>
+                      <span style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        padding: '3px 8px',
+                        borderRadius: 6,
+                        background: item._daysLeft <= 0 ? '#FEE2E2' : '#FEF3C7',
+                        color: item._daysLeft <= 0 ? '#DC2626' : '#D97706',
+                      }}>
+                        {item._daysLeft <= 0 ? 'Terlambat' : 'Segera'}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
+
+          {/* Debt widget */}
+          <DebtWidget debts={debts} setPage={setPage} />
+
+          {/* Investment widget */}
+          <InvestmentWidget investments={investments} onNavigate={() => setPage('invest')} />
 
           {/* Wallet summary */}
           <div className={styles.card}>

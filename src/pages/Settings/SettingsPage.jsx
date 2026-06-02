@@ -581,6 +581,30 @@ export default function SettingsPage({
           Impor data dari file CSV. Pilih file yang ingin diimpor (minimal 1).
         </p>
 
+        {/* Format examples toggle */}
+        <details className={styles.formatExamples}>
+          <summary className={styles.formatExamplesSummary}>📋 Lihat contoh format CSV</summary>
+          <div className={styles.formatExamplesContent}>
+            <div className={styles.formatExample}>
+              <strong>📄 Transaksi:</strong>
+              <pre>Tanggal,Tipe,Jumlah,Kategori,Sub Kategori,Dompet,Ke Dompet,Catatan{'\n'}2026-05-03,EXPENSE,38000,Kebutuhan,Makan,BRI - A,,Makan malam{'\n'}2026-05-01,INCOME,14000000,Pemasukan,Gaji,BRI - A,,{'\n'}2026-05-01,TRANSFER,200000,,,BRI - A,GoPay,</pre>
+            </div>
+            <div className={styles.formatExample}>
+              <strong>📊 Budget:</strong>
+              <pre>Periode,Total Pemasukan,Bagian,Kategori,Alokasi{'\n'}2026-05,15000000,Kebutuhan,Makan,2000000{'\n'}2026-05,15000000,Keinginan,Hobby,500000{'\n'}2026-05,15000000,Tabungan,Deposito,3000000</pre>
+            </div>
+            <div className={styles.formatExample}>
+              <strong>💰 Dompet:</strong>
+              <pre>Nama,Tipe,Saldo,Catatan{'\n'}BRI - A,Bank,5000000,Tabungan{'\n'}GoPay,E-Wallet,100000,{'\n'}Cash,Tunai,50000,</pre>
+            </div>
+            <p style={{ fontSize: 11, color: 'var(--text-5)', margin: '8px 0 0' }}>
+              Tipe dompet: Bank, E-Wallet, Kartu Kredit, PayLater, Tunai<br/>
+              Tipe transaksi: EXPENSE, INCOME, TRANSFER<br/>
+              Bagian budget: Kebutuhan, Keinginan, Tabungan
+            </p>
+          </div>
+        </details>
+
         {/* Transaksi slot */}
         <div className={styles.importSlot}>
           <span className={styles.importSlotIcon}>📄</span>

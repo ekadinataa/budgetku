@@ -8,6 +8,7 @@ import PeriodModal from './PeriodModal';
 import PeriodTransitionModal from './PeriodTransitionModal';
 import { sectionLabel, sectionColor, getPeriodRange, filterByRange, getCustomRangeKey, findActiveRange, deepCloneBudget } from '../../utils/helpers';
 import { fmtFull, fmt, monthKey } from '../../utils/formatters';
+import { getTotalAmortizedCost, getAmortizedBySection } from '../../utils/recurring';
 import { TODAY } from '../../data/defaults';
 import styles from './BudgetPage.module.css';
 
@@ -49,6 +50,7 @@ export default function BudgetPage({
   setCustomRanges,
   onCreateCategory,
   onUpdateCategory,
+  recurringItems = [],
 }) {
   const getCat = (id) => categories.find((c) => c.id === id);
   const currentMk = monthKey(new Date(TODAY));
@@ -485,6 +487,59 @@ export default function BudgetPage({
           </div>
         );
       })}
+
+      {/* Recurring Items Amortized Cost Card */}
+      {recurringItems.length > 0 && (
+        <div className={styles.sectionCard} style={{ marginTop: 20 }}>
+          <div className={styles.sectionHeader}>
+            <div className={styles.sectionLeft}>
+              <span style={{ fontSize: 16 }}>📦</span>
+              <span className={styles.sectionName}>Biaya Berkala (Amortized)</span>
+            </div>
+          </div>
+          <div style={{ padding: '12px 0' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 12 }}>
+              {['needs', 'wants', 'savings'].map((sec) => {
+                const amortized = getAmortizedBySection(recurringItems, categories);
+                const val = amortized[sec] || 0;
+                return (
+                  <div key={sec} style={{
+                    padding: '10px 12px',
+                    background: sectionColor(sec) + '10',
+                    borderRadius: 8,
+                    textAlign: 'center',
+                  }}>
+                    <div style={{ fontSize: 11, color: 'var(--text-4)', fontWeight: 600 }}>
+                      {sectionLabel(sec)}
+                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: sectionColor(sec), marginTop: 4 }}>
+                      {fmtFull(Math.round(val))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '10px 14px',
+              background: 'var(--bg-3)',
+              borderRadius: 8,
+            }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-3)' }}>
+                Total biaya berkala/bulan
+              </span>
+              <span style={{ fontSize: 15, fontWeight: 700, color: '#4F6EF7' }}>
+                {fmtFull(Math.round(getTotalAmortizedCost(recurringItems)))}
+              </span>
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 8, lineHeight: 1.5 }}>
+              💡 Ini adalah biaya bulanan dari item yang dibeli berkala (skincare, shampo, dll) yang diamortisasi berdasarkan durasi pemakaian.
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modals */}
       {showIncome && (

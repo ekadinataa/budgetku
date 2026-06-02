@@ -346,3 +346,128 @@
     height: 48px;
   }
 }
+
+/* ── Mobile Top Bar ────────────────────────────────────────────────── */
+.mobileTopBar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobileTopBar {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 52px;
+    background: var(--sidebar-bg);
+    z-index: 100;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+  }
+
+  .mobileTopLeft {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mobileTopBrand {
+    font-size: 15px;
+    font-weight: 700;
+    color: white;
+  }
+
+  .mobileUserBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    min-height: auto;
+  }
+
+  .mobileAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(79, 110, 247, 0.2);
+    color: #4F6EF7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .mobileDropdown {
+    position: absolute;
+    top: 48px;
+    right: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    padding: 8px;
+    min-width: 200px;
+    z-index: 200;
+  }
+
+  .mobileDropdownEmail {
+    font-size: 12px;
+    color: var(--text-4);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-2);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobileDropdownItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    background: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-2);
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    min-height: auto;
+  }
+
+  .mobileDropdownItem:hover {
+    background: var(--bg-3);
+  }
+
+  .mobileDropdownLogout {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    background: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #DC2626;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    min-height: auto;
+  }
+
+  .mobileDropdownLogout:hover {
+    background: #FEE2E2;
+  }
+}

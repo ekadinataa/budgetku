@@ -17,7 +17,7 @@ describe('Sidebar', () => {
     expect(screen.getByText('Money Tracker')).toBeInTheDocument();
   });
 
-  it('renders all 6 navigation items in both sidebar and bottom nav', () => {
+  it('renders all navigation items in both sidebar and bottom nav', () => {
     render(<Sidebar {...defaultProps} />);
     // Each label appears twice: once in sidebar nav, once in bottom nav
     expect(screen.getAllByText('Dashboard')).toHaveLength(2);

@@ -7,6 +7,9 @@ const NAV_ITEMS = [
   { id: 'wallet', label: 'Dompet', icon: 'wallet' },
   { id: 'tx', label: 'Transaksi', icon: 'tx' },
   { id: 'budget', label: 'Budget', icon: 'budget' },
+  { id: 'recurring', label: 'Berkala', icon: 'recurring' },
+  { id: 'debt', label: 'Utang/Piutang', icon: 'debt' },
+  { id: 'invest', label: 'Investasi', icon: 'invest' },
   { id: 'report', label: 'Laporan', icon: 'report' },
   { id: 'settings', label: 'Pengaturan', icon: 'settings' },
 ];
@@ -28,6 +31,7 @@ const NAV_ITEMS = [
  */
 export default function Sidebar({ page, setPage, darkMode, setDarkMode, user, onLogout }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const now = new Date();
   const periodText = now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
 
@@ -162,6 +166,42 @@ export default function Sidebar({ page, setPage, darkMode, setDarkMode, user, on
         </button>
       ))}
     </nav>
+
+    {/* Mobile top bar */}
+    {user && (
+      <div className={styles.mobileTopBar}>
+        <div className={styles.mobileTopLeft}>
+          <img src="/logo.svg" alt="BudgetKu" width="28" height="28" style={{ objectFit: 'contain' }} />
+          <span className={styles.mobileTopBrand}>BudgetKu</span>
+        </div>
+        <button className={styles.mobileUserBtn} onClick={() => setShowMobileMenu((v) => !v)}>
+          <div className={styles.mobileAvatar}>
+            {user.email?.charAt(0).toUpperCase() || 'U'}
+          </div>
+        </button>
+
+        {/* Mobile user dropdown */}
+        {showMobileMenu && (
+          <div className={styles.mobileDropdown}>
+            <div className={styles.mobileDropdownEmail}>{user.email}</div>
+            <button className={styles.mobileDropdownItem} onClick={() => { setDarkMode((d) => !d); setShowMobileMenu(false); }}>
+              <NavIcon name={darkMode ? 'sun' : 'moon'} size={16} />
+              {darkMode ? 'Light Mode' : 'Dark Mode'}
+            </button>
+            {onLogout && (
+              <button className={styles.mobileDropdownLogout} onClick={() => { onLogout(); setShowMobileMenu(false); }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                Keluar
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    )}
     </>
   );
 }

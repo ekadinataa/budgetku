@@ -514,7 +514,7 @@ const BATCH_LIMIT = 500;
 export async function resetUserData() {
   try {
     const uid = getUid();
-    const subcollections = ['wallets', 'transactions', 'budgets', 'categories', 'preferences'];
+    const subcollections = ['wallets', 'transactions', 'budgets', 'categories', 'preferences', 'recurringItems', 'debts', 'investments'];
 
     // Collect all document references for deletion
     const allRefs = [];
@@ -539,6 +539,200 @@ export async function resetUserData() {
     return { success: true };
   } catch (err) {
     throw new Error(`Failed to reset user data: ${err.message}`);
+  }
+}
+
+// ── Recurring Items ──────────────────────────────────────────────────
+
+export async function getRecurringItems() {
+  try {
+    const snapshot = await getDocs(userCol('recurringItems'));
+    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    throw new Error(`Failed to read recurring items: ${err.message}`);
+  }
+}
+
+export async function createRecurringItem(data) {
+  const trimmed = trimStrings(data);
+  const { name, categoryId, walletId, amount, durationDays, lastPurchaseDate, nextEstimateDate, note, tags } = trimmed;
+
+  if (!name || !name.trim()) throw new Error('Nama item wajib diisi');
+  if (!amount || amount <= 0) throw new Error('Harga harus lebih dari 0');
+  if (!durationDays || durationDays <= 0) throw new Error('Durasi harus lebih dari 0');
+
+  const itemData = {
+    name: name.trim(),
+    categoryId: categoryId || '',
+    walletId: walletId || '',
+    amount: Number(amount),
+    durationDays: Number(durationDays),
+    lastPurchaseDate: lastPurchaseDate || '',
+    nextEstimateDate: nextEstimateDate || '',
+    isActive: true,
+    note: note || '',
+    tags: tags || [],
+    createdAt: new Date().toISOString().slice(0, 10),
+  };
+
+  try {
+    const docRef = await addDoc(userCol('recurringItems'), itemData);
+    return { id: docRef.id, ...itemData };
+  } catch (err) {
+    throw new Error(`Failed to create recurring item: ${err.message}`);
+  }
+}
+
+export async function updateRecurringItem(id, data) {
+  try {
+    const updateData = { ...data };
+    // Ensure numeric fields
+    if (updateData.amount !== undefined) updateData.amount = Number(updateData.amount);
+    if (updateData.durationDays !== undefined) updateData.durationDays = Number(updateData.durationDays);
+    await updateDoc(userDoc('recurringItems', id), updateData);
+    return { id, ...updateData };
+  } catch (err) {
+    throw new Error(`Failed to update recurring item: ${err.message}`);
+  }
+}
+
+export async function deleteRecurringItem(id) {
+  try {
+    await deleteDoc(userDoc('recurringItems', id));
+    return { success: true };
+  } catch (err) {
+    throw new Error(`Failed to delete recurring item: ${err.message}`);
+  }
+}
+
+// ── Debts ────────────────────────────────────────────────────────────
+
+export async function getDebts() {
+  try {
+    const snapshot = await getDocs(userCol('debts'));
+    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    throw new Error(`Failed to read debts: ${err.message}`);
+  }
+}
+
+export async function createDebt(data) {
+  const trimmed = trimStrings(data);
+  const { type, personName, totalAmount, remainingAmount, walletId, dueDate, description, status, payments, transactionId, createdAt } = trimmed;
+
+  const debtData = {
+    type,
+    personName,
+    totalAmount: Number(totalAmount),
+    remainingAmount: Number(remainingAmount),
+    walletId,
+    dueDate: dueDate || '',
+    description: description || '',
+    status: status || 'active',
+    payments: payments || [],
+    transactionId: transactionId || '',
+    createdAt: createdAt || new Date().toISOString().slice(0, 10),
+    // Interest/annuity fields
+    interestEnabled: data.interestEnabled || false,
+    interestRate: Number(data.interestRate) || 0,
+    tenorMonths: Number(data.tenorMonths) || 0,
+    startDate: data.startDate || '',
+    monthlyInstallment: Number(data.monthlyInstallment) || 0,
+  };
+
+  try {
+    const docRef = await addDoc(userCol('debts'), debtData);
+    return { id: docRef.id, ...debtData };
+  } catch (err) {
+    throw new Error(`Failed to create debt: ${err.message}`);
+  }
+}
+
+export async function updateDebt(id, data) {
+  try {
+    const updateData = { ...data };
+    if (updateData.totalAmount !== undefined) updateData.totalAmount = Number(updateData.totalAmount);
+    if (updateData.remainingAmount !== undefined) updateData.remainingAmount = Number(updateData.remainingAmount);
+    await updateDoc(userDoc('debts', id), updateData);
+    return { id, ...updateData };
+  } catch (err) {
+    throw new Error(`Failed to update debt: ${err.message}`);
+  }
+}
+
+export async function deleteDebt(id) {
+  try {
+    await deleteDoc(userDoc('debts', id));
+    return { success: true };
+  } catch (err) {
+    throw new Error(`Failed to delete debt: ${err.message}`);
+  }
+}
+
+// ── Investments ───────────────────────────────────────────────────────
+
+export async function getInvestments() {
+  try {
+    const snapshot = await getDocs(userCol('investments'));
+    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    throw new Error(`Failed to read investments: ${err.message}`);
+  }
+}
+
+export async function createInvestment(data) {
+  const trimmed = trimStrings(data);
+  const {
+    name, assetType, notes, currentValue, transactions, createdAt, lastUpdated,
+    // Type-specific fields
+    interestRate, maturityDate, bankName, tickerSymbol, coinName, fundName, managerName, unit,
+  } = trimmed;
+
+  const investmentData = {
+    name,
+    assetType,
+    notes: notes || '',
+    currentValue: Number(currentValue) || 0,
+    transactions: transactions || [],
+    createdAt: createdAt || new Date().toISOString().slice(0, 10),
+    lastUpdated: lastUpdated || new Date().toISOString().slice(0, 10),
+    // Store ALL type-specific fields (learned from debt bug)
+    interestRate: Number(data.interestRate) || 0,
+    maturityDate: data.maturityDate || '',
+    bankName: data.bankName || '',
+    tickerSymbol: data.tickerSymbol || '',
+    coinName: data.coinName || '',
+    fundName: data.fundName || '',
+    managerName: data.managerName || '',
+    unit: data.unit || '',
+  };
+
+  try {
+    const docRef = await addDoc(userCol('investments'), investmentData);
+    return { id: docRef.id, ...investmentData };
+  } catch (err) {
+    throw new Error(`Failed to create investment: ${err.message}`);
+  }
+}
+
+export async function updateInvestment(id, data) {
+  try {
+    const updateData = { ...data };
+    if (updateData.currentValue !== undefined) updateData.currentValue = Number(updateData.currentValue);
+    if (updateData.interestRate !== undefined) updateData.interestRate = Number(updateData.interestRate);
+    await updateDoc(userDoc('investments', id), updateData);
+    return { id, ...updateData };
+  } catch (err) {
+    throw new Error(`Failed to update investment: ${err.message}`);
+  }
+}
+
+export async function deleteInvestment(id) {
+  try {
+    await deleteDoc(userDoc('investments', id));
+    return { success: true };
+  } catch (err) {
+    throw new Error(`Failed to delete investment: ${err.message}`);
   }
 }
 

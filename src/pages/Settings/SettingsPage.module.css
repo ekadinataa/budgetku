@@ -377,3 +377,71 @@
   color: #DC2626;
   background: rgba(220, 38, 38, 0.08);
 }
+
+/* ── Format Examples ───────────────────────────────────────────────── */
+.formatExamples {
+  margin-bottom: 16px;
+}
+
+.formatExamplesSummary {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4F6EF7;
+  cursor: pointer;
+  padding: 6px 0;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.formatExamplesSummary::-webkit-details-marker {
+  display: none;
+}
+
+.formatExamplesSummary::before {
+  content: '▶';
+  font-size: 9px;
+  transition: transform 0.2s;
+}
+
+details[open] > .formatExamplesSummary::before {
+  transform: rotate(90deg);
+}
+
+.formatExamplesContent {
+  margin-top: 10px;
+  padding: 12px;
+  background: var(--bg-2);
+  border-radius: 8px;
+  border: 1px solid var(--border-2);
+}
+
+.formatExample {
+  margin-bottom: 12px;
+}
+
+.formatExample:last-of-type {
+  margin-bottom: 0;
+}
+
+.formatExample strong {
+  display: block;
+  font-size: 12px;
+  color: var(--text-2);
+  margin-bottom: 4px;
+}
+
+.formatExample pre {
+  font-size: 11px;
+  color: var(--text-3);
+  background: var(--bg-card);
+  border: 1px solid var(--border-2);
+  border-radius: 6px;
+  padding: 8px 10px;
+  overflow-x: auto;
+  margin: 0;
+  white-space: pre;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  line-height: 1.5;
+}

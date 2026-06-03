@@ -187,18 +187,18 @@
 }
 
 .statusUrgent {
-  background: #FEE2E2;
-  color: #DC2626;
+  background: rgba(220, 38, 38, 0.1);
+  color: #F87171;
 }
 
 .statusSoon {
-  background: #FEF3C7;
-  color: #D97706;
+  background: rgba(217, 119, 6, 0.1);
+  color: #FBBF24;
 }
 
 .statusOk {
-  background: #DCFCE7;
-  color: #16A34A;
+  background: rgba(22, 163, 74, 0.1);
+  color: #4ADE80;
 }
 
 /* ── Action Buttons ────────────────────────────────────────────── */
@@ -346,7 +346,7 @@
 }
 
 .deleteBtn:hover {
-  background: #FEE2E2;
+  background: rgba(220, 38, 38, 0.1);
 }
 
 /* ── Checkbox ──────────────────────────────────────────────────── */

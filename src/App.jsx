@@ -12,9 +12,12 @@ import BudgetPage from './pages/Budget/BudgetPage';
 import RecurringPage from './pages/Recurring/RecurringPage';
 import DebtPage from './pages/Debt/DebtPage';
 import InvestmentPage from './pages/Investment/InvestmentPage';
+import AssetPage from './pages/Asset/AssetPage';
 import ReportsPage from './pages/Reports/ReportsPage';
 import SettingsPage from './pages/Settings/SettingsPage';
 import FirePage from './pages/Fire/FirePage';
+import HelpPage from './pages/Help/HelpPage';
+import HelpChat from './components/HelpChat/HelpChat';
 import TxFormModal from './pages/Transactions/TxFormModal';
 import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
@@ -63,6 +66,7 @@ function App() {
   const [recurringItems, setRecurringItems] = useState(savedLocal?.recurringItems || []);
   const [debts, setDebts] = useState(savedLocal?.debts || []);
   const [investments, setInvestments] = useState(savedLocal?.investments || []);
+  const [fixedAssets, setFixedAssets] = useState(savedLocal?.fixedAssets || []);
   const [fireSettings, setFireSettings] = useState(savedLocal?.fireSettings || DEFAULT_FIRE_SETTINGS);
 
   // Loading & error states
@@ -81,9 +85,9 @@ function App() {
   useEffect(() => {
     if (!IS_LOCAL_MODE) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      page, wallets, transactions, budgets, categories, darkMode, cycleStart, salaryAdjust, periodMode, customRanges, recurringItems, debts, investments, fireSettings,
+      page, wallets, transactions, budgets, categories, darkMode, cycleStart, salaryAdjust, periodMode, customRanges, recurringItems, debts, investments, fixedAssets, fireSettings,
     }));
-  }, [page, wallets, transactions, budgets, categories, darkMode, cycleStart, salaryAdjust, periodMode, customRanges, recurringItems, debts, investments, fireSettings]);
+  }, [page, wallets, transactions, budgets, categories, darkMode, cycleStart, salaryAdjust, periodMode, customRanges, recurringItems, debts, investments, fixedAssets, fireSettings]);
 
   // Show toast notification
   const showToast = useCallback((msg) => {
@@ -99,7 +103,7 @@ function App() {
       // Initialize default data for new users (no-op if already initialized)
       await api.initUser();
 
-      const [walletsData, txData, budgetsData, catsData, prefsData, recurringData, debtsData, investmentsData] = await Promise.all([
+      const [walletsData, txData, budgetsData, catsData, prefsData, recurringData, debtsData, investmentsData, fixedAssetsData] = await Promise.all([
         api.getWallets(),
         api.getTransactions(),
         api.getBudgets(),
@@ -108,12 +112,14 @@ function App() {
         api.getRecurringItems(),
         api.getDebts(),
         api.getInvestments(),
+        api.getFixedAssets(),
       ]);
       setWallets(walletsData);
       setTransactions(txData);
       setRecurringItems(recurringData);
       setDebts(debtsData);
       setInvestments(investmentsData);
+      setFixedAssets(fixedAssetsData);
       // budgets come as array from API, convert to object keyed by monthKey
       if (Array.isArray(budgetsData)) {
         const budgetMap = {};
@@ -963,6 +969,62 @@ function App() {
     }
   };
 
+  // ── Fixed Asset handlers ───────────────────────────────────────────
+
+  /** Create a fixed asset record */
+  const handleCreateFixedAsset = async (data) => {
+    if (IS_LOCAL_MODE) {
+      const created = { id: 'fa_' + Date.now(), ...data, createdAt: new Date().toISOString().slice(0, 10) };
+      setFixedAssets((items) => [...items, created]);
+      showToast('Aset tetap berhasil ditambahkan.');
+      return created;
+    }
+    try {
+      const created = await api.createFixedAsset(data);
+      setFixedAssets((items) => [...items, created]);
+      showToast('Aset tetap berhasil ditambahkan.');
+      return created;
+    } catch (err) {
+      showToast(err.message || 'Gagal membuat aset tetap.');
+      throw err;
+    }
+  };
+
+  /** Update a fixed asset record */
+  const handleUpdateFixedAsset = async (id, data) => {
+    if (IS_LOCAL_MODE) {
+      setFixedAssets((items) => items.map((i) => (i.id === id ? { ...i, ...data } : i)));
+      showToast('Aset tetap berhasil diubah.');
+      return { id, ...data };
+    }
+    try {
+      await api.updateFixedAsset(id, data);
+      setFixedAssets((items) => items.map((i) => (i.id === id ? { ...i, ...data } : i)));
+      showToast('Aset tetap berhasil diubah.');
+      return { id, ...data };
+    } catch (err) {
+      showToast(err.message || 'Gagal mengubah aset tetap.');
+      throw err;
+    }
+  };
+
+  /** Delete a fixed asset record */
+  const handleDeleteFixedAsset = async (id) => {
+    if (IS_LOCAL_MODE) {
+      setFixedAssets((items) => items.filter((i) => i.id !== id));
+      showToast('Aset tetap berhasil dihapus.');
+      return;
+    }
+    try {
+      await api.deleteFixedAsset(id);
+      setFixedAssets((items) => items.filter((i) => i.id !== id));
+      showToast('Aset tetap berhasil dihapus.');
+    } catch (err) {
+      showToast(err.message || 'Gagal menghapus aset tetap.');
+      throw err;
+    }
+  };
+
   /** Reset all user data, reload defaults, and navigate to dashboard */
   const handleResetData = async () => {
     await api.resetUserData();
@@ -1276,6 +1338,20 @@ function App() {
             onUpdateValue={handleUpdateInvestmentValue}
           />
         );
+      case 'asset':
+        return (
+          <AssetPage
+            wallets={wallets}
+            debts={debts}
+            investments={investments}
+            transactions={transactions}
+            fixedAssets={fixedAssets}
+            onCreateFixedAsset={handleCreateFixedAsset}
+            onUpdateFixedAsset={handleUpdateFixedAsset}
+            onDeleteFixedAsset={handleDeleteFixedAsset}
+            setPage={setPage}
+          />
+        );
       case 'report':
         return (
           <ReportsPage
@@ -1316,6 +1392,8 @@ function App() {
             setPage={setPage}
           />
         );
+      case 'help':
+        return <HelpPage setPage={setPage} />;
       default:
         return (
           <Dashboard
@@ -1386,6 +1464,9 @@ function App() {
           }}
         />
       )}
+
+      {/* Help Chat floating widget */}
+      <HelpChat />
     </ThemeProvider>
   );
 }

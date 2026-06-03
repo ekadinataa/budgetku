@@ -257,9 +257,9 @@
 
 .catOverBadge {
   font-size: 10px;
-  color: #EF4444;
+  color: #F87171;
   font-weight: 700;
-  background: #FEE2E2;
+  background: rgba(220, 38, 38, 0.1);
   border-radius: 4px;
   padding: 1px 5px;
 }

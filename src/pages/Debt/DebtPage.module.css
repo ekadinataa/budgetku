@@ -197,23 +197,23 @@
 }
 
 .badgeUtang {
-  background: #FEE2E2;
-  color: #DC2626;
+  background: rgba(220, 38, 38, 0.1);
+  color: #F87171;
 }
 
 .badgePiutang {
-  background: #DBEAFE;
-  color: #2563EB;
+  background: rgba(37, 99, 235, 0.1);
+  color: #60A5FA;
 }
 
 .badgeSettled {
-  background: #DCFCE7;
-  color: #16A34A;
+  background: rgba(22, 163, 74, 0.1);
+  color: #4ADE80;
 }
 
 .badgeOverdue {
-  background: #FEF3C7;
-  color: #D97706;
+  background: rgba(217, 119, 6, 0.1);
+  color: #FBBF24;
 }
 
 /* ── Progress Bar ──────────────────────────────────────────────── */
@@ -397,7 +397,7 @@
 }
 
 .deleteBtn:hover {
-  background: #FEE2E2;
+  background: rgba(220, 38, 38, 0.1);
 }
 
 .toggleBtn {

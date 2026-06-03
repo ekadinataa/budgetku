@@ -522,6 +522,6 @@
   }
 
   .mobileDropdownLogout:hover {
-    background: #FEE2E2;
+    background: rgba(220, 38, 38, 0.1);
   }
 }

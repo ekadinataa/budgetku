@@ -1,5 +1,5 @@
 /**
- * Application constants for BudgetKu Money Tracker
+ * Application constants for BudgetX Money Tracker
  */
 
 /** Wallet type options for forms and display */

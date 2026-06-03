@@ -75,8 +75,8 @@ export default function ResetConfirmModal({ onConfirm, onClose }) {
         <p style={{
           fontSize: 13,
           fontWeight: 600,
-          color: '#B45309',
-          background: '#FFFBEB',
+          color: '#FBBF24',
+          background: 'rgba(245, 158, 11, 0.08)',
           borderRadius: 8,
           padding: '10px 14px',
           marginBottom: 16,
@@ -89,8 +89,8 @@ export default function ResetConfirmModal({ onConfirm, onClose }) {
         <p style={{
           fontSize: 13,
           fontWeight: 600,
-          color: '#991B1B',
-          background: '#FEE2E2',
+          color: '#F87171',
+          background: 'rgba(220, 38, 38, 0.08)',
           borderRadius: 8,
           padding: '10px 14px',
           marginBottom: 16,

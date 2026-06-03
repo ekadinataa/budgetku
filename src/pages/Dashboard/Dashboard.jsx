@@ -219,6 +219,12 @@ export default function Dashboard({
             </span>
             <span className={styles.quickMenuLabel}>Laporan</span>
           </button>
+          <button className={styles.quickMenuItem} onClick={() => setPage('asset')}>
+            <span className={styles.quickMenuIcon} style={{ background: 'rgba(6,182,212,0.12)', color: '#06B6D4' }}>
+              <NavIcon name="asset" size={20} />
+            </span>
+            <span className={styles.quickMenuLabel}>Aset</span>
+          </button>
           <button className={styles.quickMenuItem} onClick={() => setPage('fire')}>
             <span className={styles.quickMenuIcon} style={{ background: 'rgba(245,158,11,0.12)', color: '#F59E0B' }}>
               <NavIcon name="fire" size={20} />
@@ -381,8 +387,8 @@ export default function Dashboard({
                         fontWeight: 600,
                         padding: '3px 8px',
                         borderRadius: 6,
-                        background: item._daysLeft <= 0 ? '#FEE2E2' : '#FEF3C7',
-                        color: item._daysLeft <= 0 ? '#DC2626' : '#D97706',
+                        background: item._daysLeft <= 0 ? 'rgba(220, 38, 38, 0.1)' : 'rgba(217, 119, 6, 0.1)',
+                        color: item._daysLeft <= 0 ? '#F87171' : '#FBBF24',
                       }}>
                         {item._daysLeft <= 0 ? 'Terlambat' : 'Segera'}
                       </span>

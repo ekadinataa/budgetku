@@ -60,7 +60,7 @@ export default function DataMigrator({ onComplete }) {
   return (
     <Modal title="Migrasi Data Lokal" onClose={handleDecline} width={440}>
       <p style={{ color: 'var(--text-2)', fontSize: 14, lineHeight: 1.6, marginBottom: 16 }}>
-        Kami menemukan data BudgetKu yang tersimpan di perangkat ini. Apakah Anda ingin memindahkan data tersebut ke akun Anda?
+        Kami menemukan data BudgetX yang tersimpan di perangkat ini. Apakah Anda ingin memindahkan data tersebut ke akun Anda?
       </p>
       <div
         style={{

@@ -1,5 +1,5 @@
 /**
- * Period Adjuster utility for BudgetKu.
+ * Period Adjuster utility for BudgetX.
  *
  * Provides business day detection and cycle start date adjustment
  * for the salary-aware Custom Siklus mode. When the nominal payday

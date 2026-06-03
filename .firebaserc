@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "budgetku-app-v1"
+  },
+  "targets": {
+    "budgetku-app-v1": {
+      "hosting": {
+        "budgetx": [
+          "budgetx"
+        ]
+      }
+    }
   }
 }

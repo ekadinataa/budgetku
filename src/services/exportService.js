@@ -1,5 +1,5 @@
 /**
- * Export Service — Pure functions for exporting BudgetKu data to JSON and CSV.
+ * Export Service — Pure functions for exporting BudgetX data to JSON and CSV.
  *
  * No React or Firestore dependencies. Accepts data as arguments, returns results.
  * Uses fflate for ZIP creation of CSV bundles.
@@ -10,11 +10,11 @@ import { zipSync } from 'fflate';
 // ── JSON Export ──────────────────────────────────────────────────────
 
 /**
- * Build a BudgetKu_Format v1 JSON envelope from app data.
+ * Build a BudgetX_Format v1 JSON envelope from app data.
  * @param {{ wallets: Array, transactions: Array, budgets: Object, categories: Array, preferences: Object }} data
  * @returns {{ budgetku: true, version: string, exportedAt: string, data: Object }}
  */
-export function buildBudgetKuJson(data) {
+export function buildBudgetXJson(data) {
   return {
     budgetku: true,
     version: '1.0',
@@ -41,9 +41,9 @@ export function triggerDownload(blob, filename) {
 }
 
 /**
- * Serialize a BudgetKu_Format object to JSON and trigger download.
+ * Serialize a BudgetX_Format object to JSON and trigger download.
  * Filename pattern: budgetku-export-YYYY-MM-DD.json
- * @param {Object} budgetkuJson - The BudgetKu_Format envelope
+ * @param {Object} budgetkuJson - The BudgetX_Format envelope
  */
 export function downloadJson(budgetkuJson) {
   const jsonString = JSON.stringify(budgetkuJson, null, 2);

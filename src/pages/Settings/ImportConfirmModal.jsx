@@ -66,7 +66,7 @@ export default function ImportConfirmModal({ importSummary, onConfirm, onClose, 
           alignItems: 'center',
           gap: 10,
           padding: '12px 16px',
-          background: '#FFFBEB',
+          background: 'rgba(245, 158, 11, 0.08)',
           borderRadius: 8,
           marginBottom: 16,
         }}>
@@ -78,7 +78,7 @@ export default function ImportConfirmModal({ importSummary, onConfirm, onClose, 
             borderRadius: '50%',
             animation: 'spin 0.8s linear infinite',
           }} />
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#B45309' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-2)' }}>
             {selectedMode === 'replace' ? 'Mengganti data...' : 'Menggabungkan data...'}
           </span>
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -90,8 +90,8 @@ export default function ImportConfirmModal({ importSummary, onConfirm, onClose, 
         <div style={{
           fontSize: 13,
           fontWeight: 600,
-          color: '#991B1B',
-          background: '#FEE2E2',
+          color: '#F87171',
+          background: 'rgba(220, 38, 38, 0.08)',
           borderRadius: 8,
           padding: '10px 14px',
           marginBottom: 16,

@@ -175,7 +175,7 @@ export default function InvestmentPage({
           <div className={styles.emptyIcon}>📈</div>
           <div className={styles.emptyTitle}>Belum ada investasi</div>
           <div className={styles.emptyDesc}>
-            Catat investasi Anda di sini. BudgetKu akan otomatis melacak profit/loss dan membuat transaksi di dompet.
+            Catat investasi Anda di sini. BudgetX akan otomatis melacak profit/loss dan membuat transaksi di dompet.
           </div>
           <button className={styles.addBtn} onClick={() => setShowForm(true)} style={{ margin: '0 auto' }}>
             <NavIcon name="plus" size={16} /> Tambah Pertama

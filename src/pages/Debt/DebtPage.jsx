@@ -146,7 +146,7 @@ export default function DebtPage({
           <div className={styles.emptyIcon}>📋</div>
           <div className={styles.emptyTitle}>Belum ada catatan utang/piutang</div>
           <div className={styles.emptyDesc}>
-            Catat utang dan piutang Anda di sini. BudgetKu akan otomatis membuat transaksi dan memperbarui saldo dompet.
+            Catat utang dan piutang Anda di sini. BudgetX akan otomatis membuat transaksi dan memperbarui saldo dompet.
           </div>
           <button className={styles.addBtn} onClick={() => setShowForm(true)} style={{ margin: '0 auto' }}>
             <NavIcon name="plus" size={16} /> Tambah Pertama
@@ -201,7 +201,7 @@ function DebtCard({ debt, onEdit, onPay }) {
     ? ((debt.totalAmount - debt.remainingAmount) / debt.totalAmount) * 100
     : 0;
 
-  const iconBg = debt.type === 'utang' ? '#FEE2E218' : '#DBEAFE18';
+  const iconBg = debt.type === 'utang' ? 'rgba(220, 38, 38, 0.08)' : 'rgba(37, 99, 235, 0.08)';
   const iconColor = debt.type === 'utang' ? '#DC2626' : '#2563EB';
 
   const installmentInfo = getCurrentInstallmentInfo(debt);
@@ -224,7 +224,7 @@ function DebtCard({ debt, onEdit, onPay }) {
               {debt.type === 'utang' ? 'Utang' : 'Piutang'}
             </span>
             {isAnnuityDebt && (
-              <span className={`${styles.badge}`} style={{ background: '#FEF3C7', color: '#92400E' }}>
+              <span className={`${styles.badge}`} style={{ background: 'rgba(217, 119, 6, 0.1)', color: '#FBBF24' }}>
                 {debt.interestRate}% Anuitas
               </span>
             )}
@@ -312,7 +312,7 @@ function DebtCard({ debt, onEdit, onPay }) {
                         return (
                           <tr key={i} style={{
                             borderBottom: '1px solid var(--border-2)',
-                            background: isPaid ? '#DCFCE710' : 'transparent',
+                            background: isPaid ? 'rgba(34, 197, 94, 0.04)' : 'transparent',
                             color: isPaid ? 'var(--text-4)' : 'var(--text-2)',
                           }}>
                             <td style={{ padding: '4px 6px' }}>

@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { id: 'recurring', label: 'Berkala', icon: 'recurring' },
   { id: 'debt', label: 'Utang/Piutang', icon: 'debt' },
   { id: 'invest', label: 'Investasi', icon: 'invest' },
+  { id: 'asset', label: 'Aset', icon: 'asset' },
   { id: 'report', label: 'Laporan', icon: 'report' },
   { id: 'settings', label: 'Pengaturan', icon: 'settings' },
 ];
@@ -26,7 +27,7 @@ const MOBILE_NAV_ITEMS = [
 /**
  * Sidebar — Persistent left navigation panel with collapse/expand toggle.
  *
- * Displays BudgetKu branding, 5 navigation items with active highlighting,
+ * Displays BudgetX branding, 5 navigation items with active highlighting,
  * a theme toggle button, and the active period label. Can be collapsed to
  * show only icons.
  *
@@ -50,11 +51,11 @@ export default function Sidebar({ page, setPage, darkMode, setDarkMode, user, on
       {/* Branding + collapse toggle */}
       <div className={styles.logo}>
         <div className={styles.logoMark}>
-          <img src="/logo.svg" alt="BudgetKu" width="34" height="34" style={{ objectFit: 'contain' }} />
+          <img src="/logo.svg" alt="BudgetX" width="34" height="34" style={{ objectFit: 'contain' }} />
         </div>
         {!collapsed && (
           <div className={styles.brandText}>
-            <div className={styles.brandName}>BudgetKu</div>
+            <div className={styles.brandName}>BudgetX</div>
             <div className={styles.brandSub}>Money Tracker</div>
           </div>
         )}
@@ -197,8 +198,8 @@ export default function Sidebar({ page, setPage, darkMode, setDarkMode, user, on
     {user && (
       <div className={styles.mobileTopBar}>
         <div className={styles.mobileTopLeft}>
-          <img src="/logo.svg" alt="BudgetKu" width="28" height="28" style={{ objectFit: 'contain' }} />
-          <span className={styles.mobileTopBrand}>BudgetKu</span>
+          <img src="/logo.svg" alt="BudgetX" width="28" height="28" style={{ objectFit: 'contain' }} />
+          <span className={styles.mobileTopBrand}>BudgetX</span>
         </div>
         <button className={styles.mobileUserBtn} onClick={() => setShowMobileMenu((v) => !v)}>
           <div className={styles.mobileAvatar}>
@@ -231,6 +232,10 @@ export default function Sidebar({ page, setPage, darkMode, setDarkMode, user, on
               Investasi
             </button>
             <div className={styles.mobileDropdownDivider} />
+            <button className={styles.mobileDropdownItem} onClick={() => { setPage('help'); setShowMobileMenu(false); }}>
+              <NavIcon name="settings" size={16} />
+              Bantuan
+            </button>
             <button className={styles.mobileDropdownItem} onClick={() => { setDarkMode((d) => !d); setShowMobileMenu(false); }}>
               <NavIcon name={darkMode ? 'sun' : 'moon'} size={16} />
               {darkMode ? 'Light Mode' : 'Dark Mode'}

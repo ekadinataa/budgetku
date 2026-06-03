@@ -11,9 +11,9 @@ describe('Sidebar', () => {
     setDarkMode: vi.fn(),
   };
 
-  it('renders BudgetKu branding with logo mark and subtitle', () => {
+  it('renders BudgetX branding with logo mark and subtitle', () => {
     render(<Sidebar {...defaultProps} />);
-    expect(screen.getByText('BudgetKu')).toBeInTheDocument();
+    expect(screen.getByText('BudgetX')).toBeInTheDocument();
     expect(screen.getByText('Money Tracker')).toBeInTheDocument();
   });
 

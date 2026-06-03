@@ -30,6 +30,22 @@
   --text-5: #545D68;
   --text-6: #373E47;
   --sidebar-bg: #010409;
+
+  /* Transaction badge colors */
+  --tx-badge-income-bg: rgba(22, 163, 74, 0.12);
+  --tx-badge-income-color: #4ADE80;
+  --tx-badge-expense-bg: rgba(220, 38, 38, 0.12);
+  --tx-badge-expense-color: #F87171;
+  --tx-badge-transfer-bg: rgba(99, 102, 241, 0.12);
+  --tx-badge-transfer-color: #A5B4FC;
+
+  /* Section pill colors */
+  --section-pill-needs-bg: rgba(99, 102, 241, 0.12);
+  --section-pill-needs-color: #A5B4FC;
+  --section-pill-wants-bg: rgba(245, 158, 11, 0.12);
+  --section-pill-wants-color: #FCD34D;
+  --section-pill-savings-bg: rgba(22, 163, 74, 0.12);
+  --section-pill-savings-color: #4ADE80;
 }
 
 /* ── Global Reset ─────────────────────────────────────────────────── */

@@ -131,7 +131,7 @@ export default function RecurringPage({
           <div className={styles.emptyTitle}>Belum ada barang berkala</div>
           <div className={styles.emptyDesc}>
             Tambahkan item yang kamu beli secara berkala seperti skincare, shampo, pasta gigi, dll.
-            BudgetKu akan menghitung biaya bulanan sebenarnya dan mengingatkan kapan harus beli ulang.
+            BudgetX akan menghitung biaya bulanan sebenarnya dan mengingatkan kapan harus beli ulang.
           </div>
           <button className={styles.addBtn} onClick={() => setShowForm(true)} style={{ margin: '0 auto' }}>
             <NavIcon name="plus" size={16} /> Tambah Item Pertama

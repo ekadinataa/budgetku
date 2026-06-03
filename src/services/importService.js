@@ -1,6 +1,6 @@
 /**
  * Import Service — Pure functions for parsing, validating, and computing
- * import operations for BudgetKu data.
+ * import operations for BudgetX data.
  *
  * No React or Firestore dependencies. Accepts data as arguments, returns results.
  */
@@ -14,7 +14,7 @@ import {
 import { unzipSync } from 'fflate';
 
 /**
- * Parse a JSON string and validate it as BudgetKu_Format v1.
+ * Parse a JSON string and validate it as BudgetX_Format v1.
  * Returns the parsed data payload or throws with a descriptive error.
  *
  * Validation steps:
@@ -36,9 +36,9 @@ export function parseAndValidate(jsonString) {
     throw new Error('File bukan JSON yang valid');
   }
 
-  // Step 2: Check BudgetKu marker
+  // Step 2: Check BudgetX marker
   if (obj.budgetku !== true) {
-    throw new Error('Bukan file ekspor BudgetKu');
+    throw new Error('Bukan file ekspor BudgetX');
   }
 
   // Step 3: Check version compatibility
@@ -192,7 +192,7 @@ const WALLET_TYPE_MAP = {
 };
 
 /**
- * Parse a wallet CSV file and convert rows into BudgetKu wallet objects.
+ * Parse a wallet CSV file and convert rows into BudgetX wallet objects.
  *
  * Expected CSV columns: Nama, Tipe, Saldo, Catatan
  *
@@ -246,7 +246,7 @@ const BUDGET_SECTION_MAP = {
 };
 
 /**
- * Parse a budget CSV file and convert rows into BudgetKu budget objects.
+ * Parse a budget CSV file and convert rows into BudgetX budget objects.
  *
  * Expected CSV columns: Periode, Total Pemasukan, Bagian, Kategori, Alokasi
  *
@@ -396,7 +396,7 @@ const TYPE_MAP = {
 
 /**
  * Parse a single-file CSV of transactions (e.g. from Budget Money Tracker export)
- * and convert rows into BudgetKu transaction objects.
+ * and convert rows into BudgetX transaction objects.
  *
  * Expected CSV columns: Tanggal, Tipe, Jumlah, Kategori, Sub Kategori, Dompet, Ke Dompet, Catatan
  *
@@ -618,7 +618,7 @@ function parseRow(line) {
 }
 
 /**
- * Parse a CSV ZIP file (Uint8Array) and reconstruct BudgetKu data objects.
+ * Parse a CSV ZIP file (Uint8Array) and reconstruct BudgetX data objects.
  * Expects the ZIP to contain: wallets.csv, transactions.csv, budgets.csv, categories.csv
  *
  * @param {Uint8Array} zipBytes - The ZIP file content

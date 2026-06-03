@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import ResetConfirmModal from './ResetConfirmModal';
 import ImportConfirmModal from './ImportConfirmModal';
 import NavIcon from '../../components/icons/NavIcon';
-import { buildBudgetKuJson, downloadJson, downloadCsvZip } from '../../services/exportService';
+import { buildBudgetXJson, downloadJson, downloadCsvZip } from '../../services/exportService';
 import { parseAndValidate, validateEntities, parseCsvZip, parseTransactionCsv, parseWalletCsv, parseBudgetCsv, parseCsv } from '../../services/importService';
 import styles from './SettingsPage.module.css';
 
@@ -93,7 +93,7 @@ export default function SettingsPage({
     try {
       const data = { wallets, transactions, budgets, categories, preferences };
       if (exportFormat === 'json') {
-        const budgetkuJson = buildBudgetKuJson(data);
+        const budgetkuJson = buildBudgetXJson(data);
         downloadJson(budgetkuJson);
       } else {
         downloadCsvZip(data);
@@ -483,6 +483,13 @@ export default function SettingsPage({
           <h2 className={styles.sectionTitle}>Alat Keuangan</h2>
           <button
             className={styles.btnPrimary}
+            onClick={() => setPage('help')}
+            style={{ background: '#6366F1', display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', marginBottom: 10 }}
+          >
+            📖 Bantuan &amp; Panduan
+          </button>
+          <button
+            className={styles.btnPrimary}
             onClick={() => setPage('fire')}
             style={{ background: '#F59E0B', display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}
           >
@@ -568,7 +575,7 @@ export default function SettingsPage({
       <div className={styles.sectionCard} style={{ marginBottom: 16 }}>
         <h2 className={styles.sectionTitle}>Impor Cadangan</h2>
         <p className={styles.sectionDesc}>
-          Pulihkan data dari file cadangan BudgetKu (JSON atau ZIP).
+          Pulihkan data dari file cadangan BudgetX (JSON atau ZIP).
         </p>
 
         <input
@@ -748,8 +755,8 @@ export default function SettingsPage({
           <div style={{
             fontSize: 13,
             fontWeight: 600,
-            color: '#991B1B',
-            background: '#FEE2E2',
+            color: '#F87171',
+            background: 'rgba(220, 38, 38, 0.08)',
             borderRadius: 8,
             padding: '10px 14px',
             marginTop: 12,

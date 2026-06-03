@@ -41,7 +41,7 @@ export default function DebtWidget({ debts = [], setPage }) {
             <div
               className={styles.recentIcon}
               style={{
-                background: debt.type === 'utang' ? '#FEE2E218' : '#DBEAFE18',
+                background: debt.type === 'utang' ? 'rgba(220, 38, 38, 0.08)' : 'rgba(37, 99, 235, 0.08)',
                 color: debt.type === 'utang' ? '#DC2626' : '#2563EB',
               }}
             >
@@ -58,8 +58,8 @@ export default function DebtWidget({ debts = [], setPage }) {
               fontWeight: 600,
               padding: '3px 8px',
               borderRadius: 6,
-              background: isOverdue ? '#FEE2E2' : '#FEF3C7',
-              color: isOverdue ? '#DC2626' : '#D97706',
+              background: isOverdue ? 'rgba(220, 38, 38, 0.1)' : 'rgba(217, 119, 6, 0.1)',
+              color: isOverdue ? '#F87171' : '#FBBF24',
             }}>
               {isOverdue ? `Terlambat ${Math.abs(days)} hari` : `${days} hari lagi`}
             </span>

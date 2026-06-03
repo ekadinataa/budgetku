@@ -231,15 +231,15 @@ export default function DebtFormModal({ initial, wallets, onClose, onSave, onDel
           {preview && (
             <div style={{
               padding: '12px 16px',
-              background: '#EFF6FF',
+              background: 'rgba(79, 110, 247, 0.08)',
               borderRadius: 10,
-              border: '1px solid #BFDBFE',
+              border: '1px solid rgba(79, 110, 247, 0.2)',
               marginBottom: 16,
             }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: '#1D4ED8', marginBottom: 8 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 8 }}>
                 📊 Preview Cicilan Anuitas
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 12, color: '#1E40AF' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 12, color: 'var(--text-3)' }}>
                 <div>Cicilan/bulan:</div>
                 <div style={{ fontWeight: 700 }}>{fmtFull(preview.installment)}</div>
                 <div>Total bunga:</div>

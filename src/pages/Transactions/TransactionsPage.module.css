@@ -133,7 +133,7 @@
 }
 
 .clearBtn:hover {
-  background: #FEE2E2;
+  background: rgba(220, 38, 38, 0.1);
   opacity: 1;
 }
 
@@ -180,15 +180,15 @@
 }
 
 .summaryPillIncome {
-  background: #DCFCE7;
+  background: rgba(22, 163, 74, 0.1);
 }
 
 .summaryPillExpense {
-  background: #FEE2E2;
+  background: rgba(220, 38, 38, 0.1);
 }
 
 .summaryPillNet {
-  background: #EDE9FE;
+  background: rgba(139, 92, 246, 0.1);
 }
 
 .summaryPillLabel {
@@ -260,18 +260,18 @@
 
 .dateTotalIncome {
   font-size: 12.5px;
-  color: #16A34A;
+  color: #4ADE80;
   font-weight: 700;
-  background: #DCFCE7;
+  background: rgba(22, 163, 74, 0.1);
   padding: 2px 8px;
   border-radius: 6px;
 }
 
 .dateTotalExpense {
   font-size: 12.5px;
-  color: #DC2626;
+  color: #F87171;
   font-weight: 700;
-  background: #FEE2E2;
+  background: rgba(220, 38, 38, 0.1);
   padding: 2px 8px;
   border-radius: 6px;
 }

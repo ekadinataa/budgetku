@@ -1,5 +1,5 @@
 /**
- * Helper utility functions for BudgetKu.
+ * Helper utility functions for BudgetX.
  *
  * Includes lookup helpers, label/color mappers, billing cycle period range
  * computation, transaction filtering/grouping, and wallet aggregate utilities.

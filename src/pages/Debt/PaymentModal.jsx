@@ -114,23 +114,23 @@ export default function PaymentModal({ debt, wallets, onClose, onConfirm }) {
       {isAnnuityDebt && (
         <div style={{
           padding: '12px 16px',
-          background: '#FEF3C7',
+          background: 'rgba(245, 158, 11, 0.08)',
           borderRadius: 10,
-          border: '1px solid #FDE68A',
+          border: '1px solid rgba(245, 158, 11, 0.2)',
           marginBottom: 16,
         }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#92400E', marginBottom: 6 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>
             📋 Cicilan Bulan ke-{installmentInfo.month}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, fontSize: 12, color: '#78350F' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, fontSize: 12, color: 'var(--text-3)' }}>
             <div>Pokok:</div>
             <div style={{ fontWeight: 600 }}>{fmtFull(installmentInfo.principal)}</div>
             <div>Bunga:</div>
             <div style={{ fontWeight: 600 }}>{fmtFull(installmentInfo.interest)}</div>
-            <div style={{ borderTop: '1px solid #FDE68A', paddingTop: 4, marginTop: 4 }}>Total cicilan:</div>
-            <div style={{ fontWeight: 700, borderTop: '1px solid #FDE68A', paddingTop: 4, marginTop: 4 }}>{fmtFull(installmentInfo.total)}</div>
+            <div style={{ borderTop: '1px solid rgba(245, 158, 11, 0.2)', paddingTop: 4, marginTop: 4 }}>Total cicilan:</div>
+            <div style={{ fontWeight: 700, borderTop: '1px solid rgba(245, 158, 11, 0.2)', paddingTop: 4, marginTop: 4 }}>{fmtFull(installmentInfo.total)}</div>
           </div>
-          <div style={{ fontSize: 11, color: '#92400E', marginTop: 8, lineHeight: 1.4 }}>
+          <div style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 8, lineHeight: 1.4 }}>
             💡 Dari {fmtFull(installmentInfo.total)} yang dibayar, hanya {fmtFull(installmentInfo.principal)} yang mengurangi pokok. Sisanya ({fmtFull(installmentInfo.interest)}) adalah bunga.
           </div>
         </div>

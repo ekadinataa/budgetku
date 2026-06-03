@@ -18,9 +18,9 @@ import { sectionLabel, sectionColor } from '../../utils/helpers';
 
 /** Background colors per section (light theme defaults) */
 const bgMap = {
-  needs: 'var(--section-pill-needs-bg, #EEF2FF)',
-  wants: 'var(--section-pill-wants-bg, #FEF9C3)',
-  savings: 'var(--section-pill-savings-bg, #DCFCE7)',
+  needs: 'var(--section-pill-needs-bg, rgba(99, 102, 241, 0.08))',
+  wants: 'var(--section-pill-wants-bg, rgba(245, 158, 11, 0.08))',
+  savings: 'var(--section-pill-savings-bg, rgba(22, 163, 74, 0.08))',
 };
 
 /** Foreground colors per section (light theme defaults) */

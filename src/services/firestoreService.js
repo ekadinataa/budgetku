@@ -514,7 +514,7 @@ const BATCH_LIMIT = 500;
 export async function resetUserData() {
   try {
     const uid = getUid();
-    const subcollections = ['wallets', 'transactions', 'budgets', 'categories', 'preferences', 'recurringItems', 'debts', 'investments'];
+    const subcollections = ['wallets', 'transactions', 'budgets', 'categories', 'preferences', 'recurringItems', 'debts', 'investments', 'fixedAssets'];
 
     // Collect all document references for deletion
     const allRefs = [];
@@ -733,6 +733,57 @@ export async function deleteInvestment(id) {
     return { success: true };
   } catch (err) {
     throw new Error(`Failed to delete investment: ${err.message}`);
+  }
+}
+
+// ── Fixed Assets ──────────────────────────────────────────────────────
+
+export async function getFixedAssets() {
+  try {
+    const snapshot = await getDocs(userCol('fixedAssets'));
+    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    throw new Error(`Failed to read fixed assets: ${err.message}`);
+  }
+}
+
+export async function createFixedAsset(data) {
+  const assetData = {
+    name: (data.name || '').trim(),
+    category: data.category,
+    purchasePrice: Number(data.purchasePrice),
+    currentValue: Number(data.currentValue) || Number(data.purchasePrice),
+    purchaseDate: data.purchaseDate || '',
+    note: data.note || '',
+    createdAt: new Date().toISOString().slice(0, 10),
+  };
+
+  try {
+    const docRef = await addDoc(userCol('fixedAssets'), assetData);
+    return { id: docRef.id, ...assetData };
+  } catch (err) {
+    throw new Error(`Failed to create fixed asset: ${err.message}`);
+  }
+}
+
+export async function updateFixedAsset(id, data) {
+  try {
+    const updateData = { ...data };
+    if (updateData.purchasePrice !== undefined) updateData.purchasePrice = Number(updateData.purchasePrice);
+    if (updateData.currentValue !== undefined) updateData.currentValue = Number(updateData.currentValue);
+    await updateDoc(userDoc('fixedAssets', id), updateData);
+    return { id, ...updateData };
+  } catch (err) {
+    throw new Error(`Failed to update fixed asset: ${err.message}`);
+  }
+}
+
+export async function deleteFixedAsset(id) {
+  try {
+    await deleteDoc(userDoc('fixedAssets', id));
+    return { success: true };
+  } catch (err) {
+    throw new Error(`Failed to delete fixed asset: ${err.message}`);
   }
 }
 

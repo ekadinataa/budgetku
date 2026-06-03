@@ -465,14 +465,14 @@ export default function ReportsPage({
           <div style={{
             marginTop: 16,
             padding: '12px 16px',
-            background: '#EFF6FF',
+            background: 'rgba(79, 110, 247, 0.08)',
             borderRadius: 10,
-            border: '1px solid #BFDBFE',
+            border: '1px solid rgba(79, 110, 247, 0.2)',
           }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: '#1D4ED8', marginBottom: 4 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 4 }}>
               💡 Perbandingan
             </div>
-            <div style={{ fontSize: 12, color: '#1E40AF', lineHeight: 1.5 }}>
+            <div style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.5 }}>
               Pengeluaran aktual bulan ini: <strong>{fmtFull(expense)}</strong>
               <br />
               Biaya berkala (amortized): <strong>{fmtFull(Math.round(getTotalAmortizedCost(recurringItems)))}</strong>

@@ -33,8 +33,8 @@ export default function ForgotPasswordPage({ onResetPassword, onNavigate }) {
     <div className={styles.authWrapper}>
       <div className={styles.authCard}>
         <div className={styles.logo}>
-          <img src="/logo.svg" alt="BudgetKu" className={styles.logoImg} />
-          <span className={styles.logoText}>BudgetKu</span>
+          <img src="/logo.svg" alt="BudgetX" className={styles.logoImg} />
+          <span className={styles.logoText}>BudgetX</span>
         </div>
         <h1 className={styles.title}>Reset Password</h1>
         <p className={styles.subtitle}>

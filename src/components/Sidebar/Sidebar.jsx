@@ -14,6 +14,15 @@ const NAV_ITEMS = [
   { id: 'settings', label: 'Pengaturan', icon: 'settings' },
 ];
 
+// Mobile bottom nav items (5 max with FAB in center)
+const MOBILE_NAV_ITEMS = [
+  { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
+  { id: 'tx', label: 'Transaksi', icon: 'tx' },
+  { id: '__fab__', label: '', icon: 'plus' }, // FAB placeholder
+  { id: 'report', label: 'Laporan', icon: 'report' },
+  { id: 'settings', label: 'Pengaturan', icon: 'settings' },
+];
+
 /**
  * Sidebar — Persistent left navigation panel with collapse/expand toggle.
  *
@@ -29,7 +38,7 @@ const NAV_ITEMS = [
  * @param {Object} [props.user] - Firebase user object (optional)
  * @param {() => void} [props.onLogout] - Logout callback (optional)
  */
-export default function Sidebar({ page, setPage, darkMode, setDarkMode, user, onLogout }) {
+export default function Sidebar({ page, setPage, darkMode, setDarkMode, user, onLogout, onAddTx }) {
   const [collapsed, setCollapsed] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const now = new Date();
@@ -155,16 +164,33 @@ export default function Sidebar({ page, setPage, darkMode, setDarkMode, user, on
 
     {/* Bottom navigation for mobile */}
     <nav className={styles.bottomNav}>
-      {NAV_ITEMS.map((item) => (
-        <button
-          key={item.id}
-          onClick={() => setPage(item.id)}
-          className={`${styles.bottomNavItem} ${page === item.id ? styles.bottomNavItemActive : ''}`}
-        >
-          <NavIcon name={item.icon} size={20} />
-          <span className={styles.bottomNavLabel}>{item.label}</span>
-        </button>
-      ))}
+      {MOBILE_NAV_ITEMS.map((item) => {
+        if (item.id === '__fab__') {
+          return (
+            <button
+              key="fab"
+              className={styles.fab}
+              onClick={onAddTx}
+              aria-label="Tambah Transaksi"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+          );
+        }
+        return (
+          <button
+            key={item.id}
+            onClick={() => setPage(item.id)}
+            className={`${styles.bottomNavItem} ${page === item.id ? styles.bottomNavItemActive : ''}`}
+          >
+            <NavIcon name={item.icon} size={20} />
+            <span className={styles.bottomNavLabel}>{item.label}</span>
+          </button>
+        );
+      })}
     </nav>
 
     {/* Mobile top bar */}
@@ -184,6 +210,27 @@ export default function Sidebar({ page, setPage, darkMode, setDarkMode, user, on
         {showMobileMenu && (
           <div className={styles.mobileDropdown}>
             <div className={styles.mobileDropdownEmail}>{user.email}</div>
+            <button className={styles.mobileDropdownItem} onClick={() => { setPage('wallet'); setShowMobileMenu(false); }}>
+              <NavIcon name="wallet" size={16} />
+              Dompet
+            </button>
+            <button className={styles.mobileDropdownItem} onClick={() => { setPage('budget'); setShowMobileMenu(false); }}>
+              <NavIcon name="budget" size={16} />
+              Budget
+            </button>
+            <button className={styles.mobileDropdownItem} onClick={() => { setPage('recurring'); setShowMobileMenu(false); }}>
+              <NavIcon name="recurring" size={16} />
+              Berkala
+            </button>
+            <button className={styles.mobileDropdownItem} onClick={() => { setPage('debt'); setShowMobileMenu(false); }}>
+              <NavIcon name="debt" size={16} />
+              Utang/Piutang
+            </button>
+            <button className={styles.mobileDropdownItem} onClick={() => { setPage('invest'); setShowMobileMenu(false); }}>
+              <NavIcon name="invest" size={16} />
+              Investasi
+            </button>
+            <div className={styles.mobileDropdownDivider} />
             <button className={styles.mobileDropdownItem} onClick={() => { setDarkMode((d) => !d); setShowMobileMenu(false); }}>
               <NavIcon name={darkMode ? 'sun' : 'moon'} size={16} />
               {darkMode ? 'Light Mode' : 'Dark Mode'}

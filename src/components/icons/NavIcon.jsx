@@ -140,6 +140,12 @@ export default function NavIcon({ name, size = 20, ...rest }) {
         <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
       </svg>
     ),
+    fire: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" {...rest}>
+        <path d="M12 2c1.5 2.5 5 6 5 10a5 5 0 01-10 0c0-4 3.5-7.5 5-10z" />
+        <path d="M12 18c1.1 0 2-.9 2-2 0-2-2-3-2-3s-2 1-2 3a2 2 0 002 2z" />
+      </svg>
+    ),
     settings: (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" {...rest}>
         <circle cx="12" cy="12" r="3" />

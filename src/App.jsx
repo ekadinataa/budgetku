@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
 import { useAuth } from './context/AuthContext';
-import { auth as firebaseAuth } from './config/firebase';
+import { auth as firebaseAuth, db as firebaseDb } from './config/firebase';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import Sidebar from './components/Sidebar/Sidebar';
 import DataMigrator from './components/DataMigrator';
 import Dashboard from './pages/Dashboard/Dashboard';
@@ -13,6 +14,7 @@ import DebtPage from './pages/Debt/DebtPage';
 import InvestmentPage from './pages/Investment/InvestmentPage';
 import ReportsPage from './pages/Reports/ReportsPage';
 import SettingsPage from './pages/Settings/SettingsPage';
+import FirePage from './pages/Fire/FirePage';
 import TxFormModal from './pages/Transactions/TxFormModal';
 import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
@@ -20,6 +22,7 @@ import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
 import { STORAGE_KEY } from './utils/constants';
 import { WALLETS_INIT, TRANSACTIONS_INIT, BUDGETS_INIT, CATEGORIES } from './data/defaults';
 import { buildDebtTransaction, applyPayment } from './utils/debtHelpers';
+import { DEFAULT_FIRE_SETTINGS } from './utils/fireCalculator';
 import { validateDebt, validatePayment } from './services/debtValidator';
 import { buildInvestmentTransaction, computeTotalUnits } from './utils/investmentHelpers';
 import { validateInvestment, validateInvestmentTransaction, validateCurrentValue } from './services/investmentValidator';
@@ -60,6 +63,7 @@ function App() {
   const [recurringItems, setRecurringItems] = useState(savedLocal?.recurringItems || []);
   const [debts, setDebts] = useState(savedLocal?.debts || []);
   const [investments, setInvestments] = useState(savedLocal?.investments || []);
+  const [fireSettings, setFireSettings] = useState(savedLocal?.fireSettings || DEFAULT_FIRE_SETTINGS);
 
   // Loading & error states
   const [dataLoading, setDataLoading] = useState(false);
@@ -77,9 +81,9 @@ function App() {
   useEffect(() => {
     if (!IS_LOCAL_MODE) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      page, wallets, transactions, budgets, categories, darkMode, cycleStart, salaryAdjust, periodMode, customRanges, recurringItems, debts, investments,
+      page, wallets, transactions, budgets, categories, darkMode, cycleStart, salaryAdjust, periodMode, customRanges, recurringItems, debts, investments, fireSettings,
     }));
-  }, [page, wallets, transactions, budgets, categories, darkMode, cycleStart, salaryAdjust, periodMode, customRanges, recurringItems, debts, investments]);
+  }, [page, wallets, transactions, budgets, categories, darkMode, cycleStart, salaryAdjust, periodMode, customRanges, recurringItems, debts, investments, fireSettings]);
 
   // Show toast notification
   const showToast = useCallback((msg) => {
@@ -133,6 +137,17 @@ function App() {
         if (prefsData.periodMode !== undefined) setPeriodMode(prefsData.periodMode);
         if (prefsData.customRanges !== undefined) setCustomRanges(prefsData.customRanges);
       }
+      // Load FIRE settings from Firestore
+      try {
+        const uid = firebaseAuth?.currentUser?.uid;
+        if (uid && firebaseDb) {
+          const fireDocRef = doc(firebaseDb, 'users', uid, 'preferences', 'fire');
+          const fireSnap = await getDoc(fireDocRef);
+          if (fireSnap.exists()) {
+            setFireSettings(fireSnap.data());
+          }
+        }
+      } catch { /* silent — fire settings are optional */ }
     } catch (err) {
       setDataError('Gagal memuat data. Periksa koneksi Anda.');
       showToast('Gagal memuat data dari server.');
@@ -956,6 +971,19 @@ function App() {
     showToast('Data berhasil direset.');
   };
 
+  /** Save FIRE Calculator settings */
+  const handleSaveFireSettings = (settings) => {
+    setFireSettings(settings);
+    // Persist to Firestore if authenticated
+    if (!IS_LOCAL_MODE && user && firebaseDb) {
+      try {
+        const uid = user.uid;
+        const fireDocRef = doc(firebaseDb, 'users', uid, 'preferences', 'fire');
+        setDoc(fireDocRef, settings).catch(() => {});
+      } catch { /* silent */ }
+    }
+  };
+
   /**
    * Apply imported data in the specified mode.
    * @param {Object} importData - Validated data from import file
@@ -1261,6 +1289,16 @@ function App() {
             recurringItems={recurringItems}
           />
         );
+      case 'fire':
+        return (
+          <FirePage
+            transactions={transactions}
+            investments={investments}
+            setPage={setPage}
+            onSaveFireSettings={handleSaveFireSettings}
+            fireSettings={fireSettings}
+          />
+        );
       case 'settings':
         return (
           <SettingsPage
@@ -1275,6 +1313,7 @@ function App() {
             onCreateCategory={handleCreateCategory}
             onUpdateCategory={handleUpdateCategory}
             onDeleteCategory={handleDeleteCategory}
+            setPage={setPage}
           />
         );
       default:
@@ -1300,6 +1339,7 @@ function App() {
         setDarkMode={handleSetDarkMode}
         user={user}
         onLogout={logout}
+        onAddTx={onAddTx}
       />
       <main className="appMain">
         {renderPage()}

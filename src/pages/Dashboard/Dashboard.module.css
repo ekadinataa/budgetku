@@ -3,12 +3,15 @@
   display: flex;
   gap: 20px;
   flex-direction: column;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .statGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 14px;
+  min-width: 0;
 }
 
 .mainGrid {
@@ -22,6 +25,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  min-width: 0;
 }
 
 /* ── Card ─────────────────────────────────────────────────────────── */
@@ -32,6 +36,9 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 8px rgba(0, 0, 0, 0.04);
   border: 1px solid var(--border-2);
   transition: background 0.2s, border-color 0.2s;
+  min-width: 0;
+  overflow: hidden;
+  animation: fadeInUp 0.3s ease-out;
 }
 
 .cardHeader {
@@ -39,6 +46,8 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .cardTitle {
@@ -97,6 +106,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 6px;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .budgetRowLeft {
@@ -182,6 +193,7 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 2px;
+  max-width: 100%;
 }
 
 .calDayHeader {
@@ -294,6 +306,7 @@
   align-items: center;
   gap: 10px;
   margin-bottom: 12px;
+  min-width: 0;
 }
 
 .walletIcon {
@@ -344,6 +357,7 @@
   align-items: center;
   gap: 10px;
   margin-bottom: 12px;
+  min-width: 0;
 }
 
 .recentIcon {
@@ -378,9 +392,14 @@
 
 /* ── Mobile Responsive ──────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  .wrapper {
+    overflow-x: hidden;
+    max-width: 100%;
+    width: 100%;
+  }
+
   .statGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    display: none;
   }
 
   .mainGrid {
@@ -388,15 +407,239 @@
   }
 
   .statValue {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .card {
     padding: 14px;
+    border-radius: 16px;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .leftCol,
   .rightCol {
     gap: 14px;
   }
+
+  /* Hero Card */
+  .heroCard {
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, #4F6EF7 0%, #3B5DE7 50%, #6366F1 100%);
+    border-radius: 20px;
+    padding: 20px;
+    color: white;
+    box-shadow: 0 8px 24px rgba(79, 110, 247, 0.25);
+    margin-bottom: 4px;
+    max-width: 100%;
+    overflow: hidden;
+    animation: fadeInUp 0.4s ease-out;
+  }
+
+  .heroTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .heroLabel {
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0.85;
+  }
+
+  .heroPeriod {
+    font-size: 11px;
+    opacity: 0.7;
+    background: rgba(255,255,255,0.15);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  .heroValue {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+    font-variant-numeric: tabular-nums;
+    word-break: break-all;
+  }
+
+  .heroSubCards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .heroSubCard {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    padding: 10px;
+    overflow: hidden;
+  }
+
+  .heroSubIcon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .heroSubLabel {
+    font-size: 10px;
+    opacity: 0.75;
+    margin-bottom: 2px;
+  }
+
+  .heroSubValue {
+    font-size: 12px;
+    font-weight: 700;
+    color: white !important;
+  }
+
+  /* Quick Menu */
+  .quickMenu {
+    display: block;
+    margin-bottom: 4px;
+    animation: fadeInUp 0.5s ease-out;
+  }
+
+  .quickMenuTitle {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-1);
+    margin: 0 0 12px;
+  }
+
+  .quickMenuGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .quickMenuItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 4px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-2);
+    border-radius: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    min-width: 0;
+  }
+
+  .quickMenuItem:active {
+    transform: scale(0.96);
+  }
+
+  .quickMenuIcon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .quickMenuLabel {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  /* Hide add tx button on mobile (replaced by FAB) */
+  .addTxBtn {
+    display: none;
+  }
+
+  /* Ensure wallet and recent rows fit on mobile */
+  .walletRow, .recentRow {
+    overflow: hidden;
+  }
+
+  .walletBalance {
+    font-size: 12px;
+    min-width: 0;
+    text-align: right;
+    word-break: break-all;
+  }
+
+  .recentNote {
+    font-size: 12px;
+  }
+
+  .recentIcon {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+}
+
+/* Hide hero and quick menu on desktop */
+@media (min-width: 769px) {
+  .heroCard {
+    display: none;
+  }
+
+  .quickMenu {
+    display: none;
+  }
+
+  .greeting {
+    display: none;
+  }
+}
+
+/* ── Insight Card ─────────────────────────────────────────────────── */
+.insightCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border-radius: 12px;
+  border-left: 3px solid #4F6EF7;
+  font-size: 13px;
+  color: var(--text-2);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  animation: fadeInUp 0.6s ease-out;
+}
+.insightIcon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+/* ── Greeting ─────────────────────────────────────────────────────── */
+.greeting {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-1);
+  margin-bottom: 4px;
+  animation: fadeInUp 0.3s ease-out;
+}
+.greetingSub {
+  font-size: 13px;
+  color: var(--text-4);
+  margin-bottom: 12px;
 }

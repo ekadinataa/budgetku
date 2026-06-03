@@ -95,6 +95,14 @@ export default function TxFormModal({ wallets, initial, onClose, onSave, categor
       </div>
       <Field label="Jumlah (Rp)">
         <Input type="number" value={form.amount} onChange={set('amount')} placeholder="0" />
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
+          {[10000, 25000, 50000, 100000, 200000, 500000].map(amt => (
+            <button key={amt} type="button" onClick={() => setForm(f => ({ ...f, amount: String(amt) }))}
+              style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-2)', color: 'var(--text-3)', fontSize: 11, cursor: 'pointer', fontFamily: 'inherit', minHeight: 'auto' }}>
+              {amt >= 1000000 ? `${amt/1000000}jt` : `${amt/1000}rb`}
+            </button>
+          ))}
+        </div>
       </Field>
       <Field label="Catatan">
         <Input value={form.note} onChange={set('note')} placeholder="Keterangan transaksi" />

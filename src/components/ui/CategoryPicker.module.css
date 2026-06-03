@@ -51,7 +51,7 @@
   border-radius: 10px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06);
   z-index: 100;
-  max-height: 280px;
+  max-height: 320px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -83,8 +83,8 @@
 /* ── List ──────────────────────────────────────────────────────────── */
 .list {
   overflow-y: auto;
-  max-height: 230px;
-  padding: 4px 0;
+  max-height: 270px;
+  padding: 8px;
 }
 
 .sectionHeader {
@@ -93,12 +93,79 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-5);
-  padding: 8px 12px 4px;
+  padding: 8px 4px 4px;
   position: sticky;
   top: 0;
   background: var(--bg-card);
 }
 
+/* ── Emoji Grid ────────────────────────────────────────────────────── */
+.emojiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 4px 0 8px;
+}
+
+.emojiItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  border-radius: 10px;
+  transition: background 0.1s;
+}
+
+.emojiItem:hover {
+  background: var(--bg-3);
+}
+
+.emojiItemActive {
+  background: rgba(79, 110, 247, 0.08);
+}
+
+.emojiItemActive:hover {
+  background: rgba(79, 110, 247, 0.12);
+}
+
+.emojiCircle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  border: 2px solid transparent;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.emojiItemActive .emojiCircle {
+  transform: scale(1.08);
+}
+
+.emojiLabel {
+  font-size: 10px;
+  color: var(--text-3);
+  text-align: center;
+  max-width: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.emojiItemActive .emojiLabel {
+  font-weight: 700;
+  color: #4F6EF7;
+}
+
+/* ── Legacy list item (kept for fallback) ──────────────────────────── */
 .item {
   display: flex;
   align-items: center;

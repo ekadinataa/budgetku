@@ -395,6 +395,16 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .summaryCard {
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .summaryValue {
+    font-size: 20px;
+    font-weight: 800;
+  }
+
   .formGrid {
     grid-template-columns: 1fr;
   }
@@ -409,8 +419,28 @@
     margin-top: 8px;
   }
 
+  .card {
+    border-radius: 16px;
+    padding: 14px 16px;
+  }
+
   .actions {
     flex-wrap: wrap;
+  }
+
+  /* Pill-shaped filter buttons */
+  .filterBtn {
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .filterBtnActive {
+    background: #4F6EF7;
+    color: #fff;
+    border-color: #4F6EF7;
+    border-radius: 20px;
   }
 }
 

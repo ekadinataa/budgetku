@@ -1,6 +1,7 @@
 import { fmtFull, fmt, fmtDate, monthKey } from '../../utils/formatters';
 import {
   getCatById,
+  getCatIcon,
   getWalletById,
   sectionLabel,
   sectionColor,
@@ -8,6 +9,7 @@ import {
   getRecentTransactions,
 } from '../../utils/helpers';
 import { groupByStatus, formatDaysRemaining } from '../../utils/recurring';
+import { useAuth } from '../../context/AuthContext';
 import ProgressBar from '../../components/ui/ProgressBar';
 import AmountText from '../../components/ui/AmountText';
 import NavIcon from '../../components/icons/NavIcon';
@@ -49,6 +51,19 @@ export default function Dashboard({
   const mk = monthKey(today);
   const budget = budgets[mk] || {};
   const sections = budget.sections || {};
+
+  // Auth context for greeting
+  const { user } = useAuth();
+
+  // Personalized greeting based on time of day
+  const getGreeting = () => {
+    const hour = today.getHours();
+    if (hour < 11) return 'Selamat Pagi 👋';
+    if (hour < 15) return 'Selamat Siang ☀️';
+    if (hour < 18) return 'Selamat Sore 🌅';
+    return 'Selamat Malam 🌙';
+  };
+  const userName = user?.email ? user.email.split('@')[0] : '';
 
   // Today's date string
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -104,8 +119,115 @@ export default function Dashboard({
   // Recent transactions (6 most recent non-transfer)
   const recentTxs = getRecentTransactions(transactions, 6);
 
+  // Smart insight: compute top expense category this month
+  const getInsight = () => {
+    const expenseTxs = monthTxs.filter((t) => t.type === 'expense');
+    if (expenseTxs.length === 0) return null;
+    const catTotals = {};
+    expenseTxs.forEach((t) => {
+      if (t.categoryId) {
+        catTotals[t.categoryId] = (catTotals[t.categoryId] || 0) + t.amount;
+      }
+    });
+    const sorted = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
+    if (sorted.length === 0) return null;
+    const [topCatId, topAmount] = sorted[0];
+    const topCat = getCatById(topCatId, categories);
+    if (topCat) return { icon: '💡', text: `Pengeluaran terbesarmu bulan ini: ${topCat.name} (${fmtFull(topAmount)})` };
+    return null;
+  };
+  const insight = getInsight();
+
   return (
     <div className={styles.wrapper}>
+      {/* Personalized Greeting */}
+      <div className={styles.greeting}>
+        {getGreeting()}{userName ? `, ${userName}` : ''}
+        <div className={styles.greetingSub}>Yuk, kelola keuanganmu hari ini</div>
+      </div>
+
+      {/* Mobile Hero Card */}
+      <div className={styles.heroCard}>
+        <div className={styles.heroTop}>
+          <span className={styles.heroLabel}>Total Saldo</span>
+          <span className={styles.heroPeriod}>{monthLabel}</span>
+        </div>
+        <div className={styles.heroValue}>{fmtFull(totalBalance)}</div>
+        <div className={styles.heroSubCards}>
+          <div className={styles.heroSubCard}>
+            <span className={styles.heroSubIcon} style={{ background: 'rgba(34,197,94,0.15)', color: '#22C55E' }}>↑</span>
+            <div>
+              <div className={styles.heroSubLabel}>Pemasukan</div>
+              <div className={styles.heroSubValue} style={{ color: '#22C55E' }}>{fmt(monthIncome)}</div>
+            </div>
+          </div>
+          <div className={styles.heroSubCard}>
+            <span className={styles.heroSubIcon} style={{ background: 'rgba(239,68,68,0.15)', color: '#EF4444' }}>↓</span>
+            <div>
+              <div className={styles.heroSubLabel}>Pengeluaran</div>
+              <div className={styles.heroSubValue} style={{ color: '#EF4444' }}>{fmt(monthExpense)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Smart Insight Card */}
+      {insight && (
+        <div className={styles.insightCard}>
+          <span className={styles.insightIcon}>{insight.icon}</span>
+          <span>{insight.text}</span>
+        </div>
+      )}
+
+      {/* Mobile Quick Menu */}
+      <div className={styles.quickMenu}>
+        <h3 className={styles.quickMenuTitle}>Menu</h3>
+        <div className={styles.quickMenuGrid}>
+          <button className={styles.quickMenuItem} onClick={() => setPage('budget')}>
+            <span className={styles.quickMenuIcon} style={{ background: 'rgba(79,110,247,0.12)', color: '#4F6EF7' }}>
+              <NavIcon name="budget" size={20} />
+            </span>
+            <span className={styles.quickMenuLabel}>Budget</span>
+          </button>
+          <button className={styles.quickMenuItem} onClick={() => setPage('recurring')}>
+            <span className={styles.quickMenuIcon} style={{ background: 'rgba(168,85,247,0.12)', color: '#A855F7' }}>
+              <NavIcon name="recurring" size={20} />
+            </span>
+            <span className={styles.quickMenuLabel}>Berkala</span>
+          </button>
+          <button className={styles.quickMenuItem} onClick={() => setPage('debt')}>
+            <span className={styles.quickMenuIcon} style={{ background: 'rgba(245,158,11,0.12)', color: '#F59E0B' }}>
+              <NavIcon name="debt" size={20} />
+            </span>
+            <span className={styles.quickMenuLabel}>Utang</span>
+          </button>
+          <button className={styles.quickMenuItem} onClick={() => setPage('invest')}>
+            <span className={styles.quickMenuIcon} style={{ background: 'rgba(34,197,94,0.12)', color: '#22C55E' }}>
+              <NavIcon name="invest" size={20} />
+            </span>
+            <span className={styles.quickMenuLabel}>Investasi</span>
+          </button>
+          <button className={styles.quickMenuItem} onClick={() => setPage('wallet')}>
+            <span className={styles.quickMenuIcon} style={{ background: 'rgba(236,72,153,0.12)', color: '#EC4899' }}>
+              <NavIcon name="wallet" size={20} />
+            </span>
+            <span className={styles.quickMenuLabel}>Dompet</span>
+          </button>
+          <button className={styles.quickMenuItem} onClick={() => setPage('report')}>
+            <span className={styles.quickMenuIcon} style={{ background: 'rgba(6,182,212,0.12)', color: '#06B6D4' }}>
+              <NavIcon name="report" size={20} />
+            </span>
+            <span className={styles.quickMenuLabel}>Laporan</span>
+          </button>
+          <button className={styles.quickMenuItem} onClick={() => setPage('fire')}>
+            <span className={styles.quickMenuIcon} style={{ background: 'rgba(245,158,11,0.12)', color: '#F59E0B' }}>
+              <NavIcon name="fire" size={20} />
+            </span>
+            <span className={styles.quickMenuLabel}>FIRE</span>
+          </button>
+        </div>
+      </div>
+
       {/* Top stat row */}
       <div className={styles.statGrid}>
         <StatCard
@@ -341,7 +463,7 @@ export default function Dashboard({
                       color: cat?.color || 'var(--text-5)',
                     }}
                   >
-                    {t.type === 'income' ? '↑' : '↓'}
+                    {getCatIcon(cat)}
                   </div>
                   <div className={styles.recentInfo}>
                     <div className={styles.recentNote}>{t.note}</div>

@@ -39,7 +39,7 @@ export default function ProgressBar({
           height: '100%',
           background: barColor,
           borderRadius: 99,
-          transition: 'width 0.4s ease',
+          transition: 'width 0.8s ease-out',
         }}
       />
     </div>

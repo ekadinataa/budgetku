@@ -51,6 +51,7 @@ export default function SettingsPage({
   onCreateCategory,
   onUpdateCategory,
   onDeleteCategory,
+  setPage,
 }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [exportFormat, setExportFormat] = useState('json');
@@ -475,6 +476,20 @@ export default function SettingsPage({
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>Pengaturan</h1>
       </div>
+
+      {/* ── FIRE Calculator Link ─────────────────────────────────── */}
+      {setPage && (
+        <div className={styles.sectionCard} style={{ marginBottom: 16 }}>
+          <h2 className={styles.sectionTitle}>Alat Keuangan</h2>
+          <button
+            className={styles.btnPrimary}
+            onClick={() => setPage('fire')}
+            style={{ background: '#F59E0B', display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}
+          >
+            🔥 Kalkulator FIRE
+          </button>
+        </div>
+      )}
 
       {/* ── Export Section ──────────────────────────────────────────── */}
       <div className={styles.sectionCard} style={{ marginBottom: 16 }}>

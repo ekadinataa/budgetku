@@ -21,6 +21,45 @@ export function getCatById(id, categories) {
 }
 
 /**
+ * Get the emoji icon for a category.
+ * Falls back to name-based lookup for categories stored in Firestore without icon field.
+ *
+ * @param {object} category - Category object (may or may not have `icon` field)
+ * @returns {string} Emoji string
+ */
+export function getCatIcon(category) {
+  if (!category) return '📦';
+  if (category.icon) return category.icon;
+  // Fallback: map by name for existing Firestore data without icon field
+  const nameMap = {
+    'makanan': '🍔',
+    'transport': '🚗',
+    'utilitas': '💡',
+    'kesehatan': '💊',
+    'pendidikan': '📚',
+    'belanja': '🛒',
+    'hiburan': '🎮',
+    'makan di luar': '🍽️',
+    'fashion': '👕',
+    'langganan': '📱',
+    'hobi': '🎨',
+    'dana darurat': '🛡️',
+    'investasi': '📈',
+    'dana pensiun': '🏖️',
+    'gaji': '💰',
+    'freelance': '💻',
+    'hasil investasi': '💵',
+    'lainnya': '📦',
+  };
+  const name = (category.name || '').toLowerCase();
+  for (const [key, emoji] of Object.entries(nameMap)) {
+    if (name.includes(key)) return emoji;
+  }
+  // Final fallback: first letter
+  return category.name ? category.name.charAt(0) : '📦';
+}
+
+/**
  * Find a wallet by ID.
  *
  * @param {string} id - Wallet ID

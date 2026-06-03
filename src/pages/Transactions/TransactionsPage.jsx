@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { fmtFull, fmt, monthKey } from '../../utils/formatters';
-import { getCatById } from '../../utils/helpers';
+import { getCatById, getCatIcon } from '../../utils/helpers';
 import NavIcon from '../../components/icons/NavIcon';
 import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
@@ -351,7 +351,7 @@ export default function TransactionsPage({ wallets, setWallets, transactions, se
               onClick={() => setExpandedTxId(expandedTxId === t.id ? null : t.id)}
             >
               <div className={styles.txIcon} style={{ background: (cat?.color || 'var(--text-6)') + '20', color: cat?.color || 'var(--text-4)' }}>
-                {t.type === 'income' ? '↑' : t.type === 'transfer' ? '⇄' : '↓'}
+                {t.type === 'transfer' ? '⇄' : getCatIcon(cat)}
               </div>
               <div className={styles.txBody}>
                 <div className={styles.txNote}>{t.note}</div>

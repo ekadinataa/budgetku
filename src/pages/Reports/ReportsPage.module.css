@@ -332,19 +332,29 @@
   }
 
   .cashCardValue {
-    font-size: 18px;
+    font-size: 20px;
+    font-weight: 800;
   }
 
   .card {
-    padding: 14px;
+    padding: 16px;
+    border-radius: 16px;
   }
 
   .cashCard {
-    padding: 14px;
+    padding: 16px;
+    border-radius: 16px;
   }
 
   .pieChartWrap {
     max-width: 160px;
     margin: 0 auto;
+  }
+
+  /* Pill-shaped cycle button */
+  .cycleBtn {
+    border-radius: 20px;
+    padding: 9px 18px;
+    font-size: 12px;
   }
 }

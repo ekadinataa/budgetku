@@ -10,11 +10,10 @@ const SECTION_LABELS = {
 const SECTION_ORDER = ['needs', 'wants', 'savings', 'income'];
 
 /**
- * CategoryPicker — Custom dropdown for selecting a category.
+ * CategoryPicker — Custom dropdown with emoji grid for selecting a category.
  *
  * Shows a trigger button with the selected category (color dot + name).
- * When clicked, opens a dropdown panel with search input and categories
- * grouped by section (Kebutuhan, Keinginan, Tabungan, Pemasukan).
+ * When clicked, opens a dropdown panel with a 4-column emoji grid grouped by section.
  *
  * @param {Object} props
  * @param {Array} props.categories - Filtered categories (already filtered by tx type)
@@ -60,7 +59,7 @@ export default function CategoryPicker({ categories, value, onChange }) {
   }
 
   const handleSelect = (id) => {
-    onChange({ target: { value: id } }); // mimic event shape for compatibility with set('categoryId')
+    onChange({ target: { value: id } });
     setOpen(false);
     setSearch('');
   };
@@ -96,17 +95,27 @@ export default function CategoryPicker({ categories, value, onChange }) {
             {Object.entries(grouped).map(([sec, items]) => (
               <div key={sec}>
                 <div className={styles.sectionHeader}>{SECTION_LABELS[sec]}</div>
-                {items.map((cat) => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    className={`${styles.item} ${cat.id === value ? styles.itemActive : ''}`}
-                    onClick={() => handleSelect(cat.id)}
-                  >
-                    <span className={styles.dot} style={{ background: cat.color }} />
-                    <span>{cat.name}</span>
-                  </button>
-                ))}
+                <div className={styles.emojiGrid}>
+                  {items.map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      className={`${styles.emojiItem} ${cat.id === value ? styles.emojiItemActive : ''}`}
+                      onClick={() => handleSelect(cat.id)}
+                    >
+                      <span
+                        className={styles.emojiCircle}
+                        style={{
+                          background: cat.color + '26',
+                          borderColor: cat.id === value ? cat.color : 'transparent',
+                        }}
+                      >
+                        {cat.icon || cat.name.charAt(0)}
+                      </span>
+                      <span className={styles.emojiLabel}>{cat.name}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
